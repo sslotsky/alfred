@@ -1,0 +1,10 @@
+html
+  head
+    title Alfred
+    script(type="module").
+      import { AlfredChatbot } from '/alfred-chatbot.js';
+
+      customElements.define('alfred-chatbot', AlfredChatbot);
+    
+  body
+    alfred-chatbot Ask me a question!

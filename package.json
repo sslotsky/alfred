@@ -13,9 +13,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.19.0",
   "dependencies": {
+    "@lit-labs/ssr": "^3.3.1",
     "@modelcontextprotocol/sdk": "^1.20.2",
     "express": "^5.1.0",
+    "lit-element": "^4.2.1",
+    "lit-html": "^3.3.1",
     "ollama": "^0.6.0",
+    "pug": "^3.0.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
