@@ -32,9 +32,14 @@ export class AlfredChatbot extends LitElement {
           this.message += new TextDecoder().decode(value);
         }
 
-        const next = await stream.read();
-        done = next.done;
-        value = next.value;
+        try {
+          const next = await stream.read();
+          done = next.done;
+          value = next.value;
+        } catch (e) {
+          console.error(e);
+          done = true;
+        }
       }
 
       const doneThinking = new CustomEvent('alfred-chatbot-done');
