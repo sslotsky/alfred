@@ -18,16 +18,15 @@ export async function chat(
 ) {
   const stream = new PassThrough();
 
-  const answer = await ollama.generate({
+  const answer = await ollama.chat({
     stream: true,
     model: OLLAMA_MODEL,
-    prompt,
+    messages: [{ role: "user", content: prompt }],
   });
 
-  console.log("got response");
   stream.pipe(writeStream);
   for await (const part of answer) {
-    stream.write(part.thinking ?? part.response);
+    stream.write(part.message.thinking);
   }
 
   stream.end();

@@ -10,9 +10,19 @@ export class AlfredChatbot extends LitElement {
     this.message = '';
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    fetch('/chat').then(async res => {
+  handleSubmit = (e) => {
+    const text = e.detail.text;
+    console.log(text);
+    const thinking = new CustomEvent('alfred-chatbot-thinking');
+    document.dispatchEvent(thinking);
+
+    fetch('/chat', {
+      method: 'POST',
+      body: JSON.stringify({ prompt: text }),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(async res => {
       const stream = res.body.getReader();
       let { done, value } = await stream.read();
       while (!done) {
@@ -24,7 +34,20 @@ export class AlfredChatbot extends LitElement {
         done = next.done;
         value = next.value;
       }
+
+      const doneThinking = new CustomEvent('alfred-chatbot-done');
+      document.dispatchEvent(doneThinking);
     });
+  }
+
+  connectedCallback() {
+    super.connectedCallback();
+    document.addEventListener('alfred-prompt-submitted', this.handleSubmit)
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    document.removeEventListener('alfred-prompt-submitted', this.handleSubmit);
   }
 
   render() {
