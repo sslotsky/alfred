@@ -23,7 +23,7 @@ export class AlfredPrompt extends LitElement {
     super.connectedCallback();
 
     document.addEventListener('alfred-chatbot-thinking', this.pause);
-    document.addEventListener('alfred-chatbot-paused', this.unpause);
+    document.addEventListener('alfred-chatbot-done', this.unpause);
 
     this.addEventListener('keyup', e => {
       if (e.key === "Enter" && !e.shiftKey && !this.paused) {
@@ -39,7 +39,7 @@ export class AlfredPrompt extends LitElement {
     super.disconnectedCallback();
 
     document.removeEventListener('alfred-chatbot-thinking', this.pause);
-    document.removeEventListener('alfred-chatbot-paused', this.unpause);
+    document.removeEventListener('alfred-chatbot-done', this.unpause);
   }
 
   render() {

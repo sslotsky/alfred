@@ -11,6 +11,7 @@ export class AlfredChatbot extends LitElement {
   }
 
   handleSubmit = (e) => {
+    this.message = 'Thinking....';
     const text = e.detail.text;
     console.log(text);
     const thinking = new CustomEvent('alfred-chatbot-thinking');
@@ -25,6 +26,7 @@ export class AlfredChatbot extends LitElement {
     }).then(async res => {
       const stream = res.body.getReader();
       let { done, value } = await stream.read();
+      this.message = '';
       while (!done) {
         if (value) {
           this.message += new TextDecoder().decode(value);
