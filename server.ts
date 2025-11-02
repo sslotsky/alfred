@@ -1,4 +1,5 @@
 import express from "express";
+import session from "express-session";
 import { chat } from "./chat.ts";
 import bodyParser from "body-parser";
 
@@ -8,19 +9,27 @@ const port = 3000;
 app.set("view engine", "pug");
 app.use(express.static("public"));
 app.use(bodyParser.json());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET ?? "supersecret",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
-app.get("/", (_req, res) => {
+app.get("/", (req, res) => {
+  console.log(req.session.id);
   res.render("index");
 });
 
 app.post("/chat", (req, res) => {
-  console.log("starting chat");
   chat(
     req.body.prompt ?? "Tell me something interesting",
+    req.session.id,
     res
   );
 });
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Listening on port ${port}`);
 });
