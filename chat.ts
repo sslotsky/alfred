@@ -26,7 +26,7 @@ export async function chat(
 
   stream.pipe(writeStream);
   for await (const part of answer) {
-    stream.write(part.message.thinking);
+    stream.write(part.message.thinking ?? "");
   }
 
   stream.end();
