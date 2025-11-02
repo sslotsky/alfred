@@ -13,7 +13,6 @@ export class AlfredChatbot extends LitElement {
   handleSubmit = (e) => {
     this.message = 'Thinking....';
     const text = e.detail.text;
-    console.log(text);
     const thinking = new CustomEvent('alfred-chatbot-thinking');
     document.dispatchEvent(thinking);
 

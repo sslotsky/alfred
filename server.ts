@@ -18,7 +18,6 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  console.log(req.session.id);
   res.render("index");
 });
 
