@@ -61,6 +61,10 @@ body {
   display: inline-block;
 }
 
+.scroll-container alfred-chatbot {
+  width: calc(100% - 2rem);
+}
+
 .message {
   display: grid;
   grid-template-columns: 5rem auto;
