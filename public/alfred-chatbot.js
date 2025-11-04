@@ -91,7 +91,7 @@ export class AlfredChatbot extends LitElement {
       ${messageHtml}
       ${lastMessageIsUser ? html`
         <div class="message">
-          <span>assistant&#58;</span><span>${this.incomingMessage}</span>
+          <span>assistant&#58;</span><span>${this.incomingMessage || "Thinking..."}</span>
         </div>
       ` : nothing}
     `
