@@ -56,43 +56,6 @@ async function getMarkdown(content: string) {
 export async function getMessageHtml(
   messages: Message[]
 ): Promise<Message[]> {
-  //   if (messages.length === 0) {
-  //     messages.push(
-  //       {
-  //         role: "user",
-  //         content: "Spit out some markdown for me!",
-  //       },
-  //       {
-  //         role: "assistant",
-  //         content: `
-  // Yakkity yak, **don't talk back**
-
-  // # Heading
-  // ## Subheading
-
-  // \`\`\`ts
-  // const marked = new Marked(
-  //   markedHighlight({
-  //     emptyLangClass: "hljs",
-  //     langPrefix: "hljs language-",
-  //     highlight(code, lang, info) {
-  //       const language = hljs.getLanguage(lang)
-  //         ? lang
-  //         : "plaintext";
-  //       return hljs.highlight(code, { language }).value;
-  //     },
-  //   })
-  // );
-  // \`\`\`
-  //       `,
-  //       },
-  //       {
-  //         role: "user",
-  //         content: "That's awesome!",
-  //       }
-  //     );
-  //   }
-
   return Promise.all(
     messages.map(async (m) => {
       const thinking =

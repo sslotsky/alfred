@@ -1,14 +1,22 @@
 
 import { LitElement, html, css, nothing } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
-import { Task } from '@lit/task';
-
 
 import remarkRehype from 'https://esm.sh/remark-rehype?bundle'
-import rehypeStarryNight from 'https://esm.sh/rehype-starry-night?bundle'
+// import rehypeStarryNight from 'https://esm.sh/rehype-starry-night?bundle'
 import rehypeStringify from "https://esm.sh/rehype-stringify?bundle";
 import remarkParse from "https://esm.sh/remark-parse?bundle";
 import { unified } from "https://esm.sh/unified?bundle";
+
+function getMarkdown(content) {
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    // .use(rehypeStarryNight)
+    .use(rehypeStringify);
+
+  return String(processor.processSync(content));
+}
 
 export class AlfredChatMessage extends LitElement {
   static styles = css`
@@ -56,44 +64,11 @@ export class AlfredChatMessage extends LitElement {
     this.message = '';
   }
 
-  messageTask = new Task(this, {
-    task: async ([message, role]) => {
-      const processor = unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(rehypeStarryNight)
-        .use(rehypeStringify);
-
-      const content = String(await processor.process(message));
-
-      return [content, role]
-
-    },
-    args: () => [this.message, this.role]
-  });
-
-  incomplete() {
-    return html`
-      <div class="message">
-        <span class="role"></span>
-        <span class="message-content"></span>
-      </div>
-    `;
-  }
-
-
   render() {
     return html`
-      ${this.messageTask.render({
-        initial: this.incomplete,
-        pending: this.incomplete,
-        complete: ([message, role]) => {
-          return html`
-            <div class="message ${role}">
-              <span class="role">${role}&#58;</span>
-              <span class="message-content">${unsafeHTML(message)}</span>
-            </div>`;
-        }
-      })}`;
+      <div class="message ${this.role}">
+        <span class="role">${this.role}&#58;</span>
+        <span class="message-content">${unsafeHTML(getMarkdown(this.message))}</span>
+      </div>`;
   }
 }
