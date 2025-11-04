@@ -19,6 +19,10 @@ export class AlfredPrompt extends LitElement {
     this.paused = false;
   }
 
+  getSlotContent() {
+    return this.renderRoot.querySelector('slot').assignedElements()[0];
+  }
+
   connectedCallback() {
     super.connectedCallback();
 
@@ -27,7 +31,7 @@ export class AlfredPrompt extends LitElement {
 
     this.addEventListener('keyup', e => {
       if (e.key === "Enter" && !e.shiftKey && !this.paused) {
-        const child = this.renderRoot.querySelector('slot').assignedElements()[0];
+        const child = this.getSlotContent();
         const event = new CustomEvent('alfred-prompt-submitted', { detail: { text: child.textContent }});
         document.dispatchEvent(event);
         child.textContent = '';

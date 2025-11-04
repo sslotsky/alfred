@@ -1,39 +1,8 @@
 html
   head
     title Alfred
-    style.
-      .chat-window {
-        border: 2px double black;
-        border-radius: 5px;
-        padding: 1rem;
-        min-height: 75%;
-        display: flex;
-        flex-direction: column;
-      }
-
-      .prompt-container {
-        width: calc(100% - 1rem);
-        border: inherit;
-        border-radius: inherit;
-        padding: 0.25rem;
-        margin-top: auto;
-      }
-
-      .prompt {
-        display: inline-block;
-        width: 100%;
-        height: 100%;
-        min-height: 3rem;
-        outline: none;
-        cursor: text;
-      }
-
-      .prompt:empty::after {
-        content: "What's your question?";
-        color: gray;
-        display: inline-block;
-      }
-
+    
+    link(href="/styles.css" rel="stylesheet")
 
     script(type="module").
       import { AlfredChatbot } from '/alfred-chatbot.js';
@@ -41,11 +10,25 @@ html
 
       customElements.define('alfred-chatbot', AlfredChatbot);
       customElements.define('alfred-prompt', AlfredPrompt);
+
+      document.addEventListener('alfred-chatbot-thinking', () => {
+        const window = document.querySelector('div.chat-window');
+        window.classList.add('thinking');
+      });
+
+      document.addEventListener('alfred-chatbot-done', () => {
+        const window = document.querySelector('div.chat-window');
+        window.classList.remove('thinking');
+      });
     
   body
     div(class='chat-window')
       div(class='scroll-container')
-        alfred-chatbot Ask me a question!
+        alfred-chatbot
+          each message in messages
+            div(class="message")
+              span= message.role + ":"
+              span= message.content ? message.content : message.thinking
       div(class="prompt-container")
         alfred-prompt
           span(class="prompt" contenteditable="true")

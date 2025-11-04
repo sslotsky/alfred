@@ -30,6 +30,11 @@ function getEntry(sessionId: string) {
   return newEntry;
 }
 
+export function getMessages(sessionId: string): Message[] {
+  const entry = map.get(sessionId);
+  return entry?.messages ?? [];
+}
+
 export async function chat(
   prompt: string,
   sessionId: string,
@@ -51,7 +56,6 @@ export async function chat(
   });
 
   stream.pipe(writeStream);
-  stream.write("Just thinking out loud here...\n\n");
   let isThinking = true;
 
   for await (const part of answer) {
@@ -61,7 +65,6 @@ export async function chat(
     } else if (part.message.content) {
       if (isThinking) {
         isThinking = false;
-        stream.write("\nAnswer:\n\n");
       }
       content += part.message.content;
       stream.write(part.message.content);

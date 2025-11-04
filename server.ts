@@ -1,6 +1,6 @@
 import express from "express";
 import session from "express-session";
-import { chat } from "./chat.ts";
+import { chat, getMessages } from "./chat.ts";
 import bodyParser from "body-parser";
 
 const app = express();
@@ -18,7 +18,9 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-  res.render("index");
+  res.render("index", {
+    messages: getMessages(req.session.id),
+  });
 });
 
 app.post("/chat", (req, res) => {

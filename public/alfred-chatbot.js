@@ -1,18 +1,37 @@
-import { LitElement, html } from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js';
+import { LitElement, html, css, nothing } from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js';
 
 export class AlfredChatbot extends LitElement {
+    static styles = css`
+      .message {
+        display: grid;
+        grid-template-columns: 5rem auto;
+        width: 100%;
+        padding: 0.25rem;
+      }
+  `;
+
   static properties = {
-    message: { state: true }
+    messages: { state: true },
+    incomingMessage: { state: true },
+    isEmpty: { state: true },
   };
 
   constructor() {
     super();
-    this.message = '';
+    this.messages = [];
+    this.incomingMessage = '';
+    this.isEmpty = false;
   }
 
+  addMessage(message) {
+    this.messages.push(message);
+    this.requestUpdate();
+  }
   handleSubmit = (e) => {
-    this.message = 'Thinking....';
     const text = e.detail.text;
+    this.addMessage({ role: 'user', content: text })
+
+
     const thinking = new CustomEvent('alfred-chatbot-thinking');
     document.dispatchEvent(thinking);
 
@@ -25,21 +44,19 @@ export class AlfredChatbot extends LitElement {
     }).then(async res => {
       const stream = res.body.getReader();
       let { done, value } = await stream.read();
-      this.message = '';
+      this.incomingMessage = '';
       while (!done) {
         if (value) {
-          this.message += new TextDecoder().decode(value);
+          this.incomingMessage += new TextDecoder().decode(value);
         }
 
-        try {
-          const next = await stream.read();
-          done = next.done;
-          value = next.value;
-        } catch (e) {
-          console.error(e);
-          done = true;
-        }
+        const next = await stream.read();
+        done = next.done;
+        value = next.value;
       }
+
+      this.addMessage({ role: 'assistant', content: this.incomingMessage })
+      this.incomingMessage = '';
 
       const doneThinking = new CustomEvent('alfred-chatbot-done');
       document.dispatchEvent(doneThinking);
@@ -56,7 +73,27 @@ export class AlfredChatbot extends LitElement {
     document.removeEventListener('alfred-prompt-submitted', this.handleSubmit);
   }
 
+  updated() {
+    const slotChildren = this.renderRoot.querySelector('slot').assignedElements();
+    this.isEmpty = slotChildren.length === 0 && this.messages.length === 0;
+  }
+
   render() {
-    return this.message ? html`<pre style="text-wrap-mode: wrap">${this.message}</pre>` : html`<slot></slot>`;
+    const messageHtml = this.messages.map(m => {
+      return html`<div class="message"><span>${m.role}&#58;</span><span>${m.content}</span></div>`
+    });
+
+    const lastMessageIsUser = this.messages[this.messages.length - 1]?.role === "user";
+
+    return html`
+      <slot @slotchange=${this.handleSlotChange}></slot>
+      ${this.isEmpty ? "Ask me a question!" : nothing}
+      ${messageHtml}
+      ${lastMessageIsUser ? html`
+        <div class="message">
+          <span>assistant&#58;</span><span>${this.incomingMessage}</span>
+        </div>
+      ` : nothing}
+    `
   }
 }
