@@ -1,5 +1,10 @@
 import { type Message, Ollama } from "ollama";
 import { PassThrough } from "stream";
+import rehypeStarryNight from "rehype-starry-night";
+import rehypeStringify from "rehype-stringify";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
+import { unified } from "unified";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
@@ -30,9 +35,73 @@ function getEntry(sessionId: string) {
   return newEntry;
 }
 
-export function getMessages(sessionId: string): Message[] {
+export async function getMessages(
+  sessionId: string
+): Promise<Message[]> {
   const entry = map.get(sessionId);
-  return entry?.messages ?? [];
+  return getMessageHtml(entry?.messages ?? []);
+}
+
+async function getMarkdown(content: string) {
+  const file = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeStarryNight)
+    .use(rehypeStringify)
+    .process(content);
+
+  return String(file);
+}
+
+export async function getMessageHtml(
+  messages: Message[]
+): Promise<Message[]> {
+  //   if (messages.length === 0) {
+  //     messages.push(
+  //       {
+  //         role: "user",
+  //         content: "Spit out some markdown for me!",
+  //       },
+  //       {
+  //         role: "assistant",
+  //         content: `
+  // Yakkity yak, **don't talk back**
+
+  // # Heading
+  // ## Subheading
+
+  // \`\`\`ts
+  // const marked = new Marked(
+  //   markedHighlight({
+  //     emptyLangClass: "hljs",
+  //     langPrefix: "hljs language-",
+  //     highlight(code, lang, info) {
+  //       const language = hljs.getLanguage(lang)
+  //         ? lang
+  //         : "plaintext";
+  //       return hljs.highlight(code, { language }).value;
+  //     },
+  //   })
+  // );
+  // \`\`\`
+  //       `,
+  //       },
+  //       {
+  //         role: "user",
+  //         content: "That's awesome!",
+  //       }
+  //     );
+  //   }
+
+  return Promise.all(
+    messages.map(async (m) => {
+      const thinking =
+        m.thinking && (await getMarkdown(m.thinking));
+      const content =
+        m.content && (await getMarkdown(m.content));
+      return { ...m, thinking, content };
+    })
+  );
 }
 
 export async function chat(

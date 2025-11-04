@@ -1,15 +1,6 @@
-import { LitElement, html, css, nothing } from 'https://cdn.jsdelivr.net/gh/lit/dist@3/core/lit-core.min.js';
+import { LitElement, html, nothing } from 'lit';
 
 export class AlfredChatbot extends LitElement {
-    static styles = css`
-      .message {
-        display: grid;
-        grid-template-columns: 5rem auto;
-        width: 100%;
-        padding: 0.25rem;
-      }
-  `;
-
   static properties = {
     messages: { state: true },
     incomingMessage: { state: true },
@@ -27,6 +18,7 @@ export class AlfredChatbot extends LitElement {
     this.messages.push(message);
     this.requestUpdate();
   }
+
   handleSubmit = (e) => {
     const text = e.detail.text;
     this.addMessage({ role: 'user', content: text })
@@ -79,21 +71,20 @@ export class AlfredChatbot extends LitElement {
   }
 
   render() {
-    const messageHtml = this.messages.map(m => {
-      return html`<div class="message"><span>${m.role}&#58;</span><span>${m.content}</span></div>`
+    const messageHtml = this.messages.map((m) => {
+      return html`<alfred-chat-message role="${m.role}" message="${m.content}"></alfred-chat-message>`;
     });
 
-    const lastMessageIsUser = this.messages[this.messages.length - 1]?.role === "user";
+    const lastMessage = { role: "assistant", content: this.incomingMessage };
+    const response = html`
+      <alfred-chat-message role="${lastMessage.role}" message=${lastMessage.content}></alfred-chat-message>
+    `;
 
     return html`
       <slot @slotchange=${this.handleSlotChange}></slot>
       ${this.isEmpty ? "Ask me a question!" : nothing}
       ${messageHtml}
-      ${lastMessageIsUser ? html`
-        <div class="message">
-          <span>assistant&#58;</span><span>${this.incomingMessage || "Thinking..."}</span>
-        </div>
-      ` : nothing}
-    `
+      ${response}
+    `;
   }
 }

@@ -3,13 +3,32 @@ html
     title Alfred
     
     link(href="/styles.css" rel="stylesheet")
+    link(href="/dark.css" rel="stylesheet")
+
+    script(type="importmap").
+      {
+        "imports": {
+          "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm",
+          "lit/": "https://cdn.jsdelivr.net/npm/lit@3/",
+          "lit-html": "https://cdn.jsdelivr.net/npm/lit-html@3/+esm",
+          "lit-html/": "https://cdn.jsdelivr.net/npm/lit-html@3/",
+          "lit-element": "https://cdn.jsdelivr.net/npm/lit-element@4/+esm",
+          "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
+          "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/+esm",
+          "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/",
+          "@lit/task": "https://cdn.jsdelivr.net/npm/@lit/task@1/+esm",
+          "@lit/task/": "https://cdn.jsdelivr.net/npm/@lit/task@1/"
+        }
+      }
 
     script(type="module").
       import { AlfredChatbot } from '/alfred-chatbot.js';
       import { AlfredPrompt } from '/alfred-prompt.js';
+      import { AlfredChatMessage } from '/alfred-chat-message.js';
 
       customElements.define('alfred-chatbot', AlfredChatbot);
       customElements.define('alfred-prompt', AlfredPrompt);
+      customElements.define('alfred-chat-message', AlfredChatMessage);
 
       document.addEventListener('alfred-chatbot-thinking', () => {
         const window = document.querySelector('div.chat-window');
@@ -20,15 +39,16 @@ html
         const window = document.querySelector('div.chat-window');
         window.classList.remove('thinking');
       });
-    
+
   body
     div(class='chat-window')
       div(class='scroll-container')
         alfred-chatbot
           each message in messages
-            div(class="message")
-              span= message.role + ":"
-              span= message.content ? message.content : message.thinking
+            div(class=`message ${message.role}`)
+              span(class="role")= message.role + ":"
+              span(class="message-content")
+                | !{message.content ? message.content : message.thinking}
       div(class="prompt-container")
         alfred-prompt
           span(class="prompt" contenteditable="true")
