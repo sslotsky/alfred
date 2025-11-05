@@ -1,5 +1,5 @@
 
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, css, nothing } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import remarkRehype from 'https://esm.sh/remark-rehype?bundle'
@@ -87,7 +87,7 @@ export class AlfredChatMessage extends LitElement {
 
 
   render() {
-    const leftSide = this.thinking && this.role === 'assistant' ? '🧠' : '👨🏽‍💻';
+    const leftSide = this.role === 'user' ? '👨🏽‍💻' : this.thinking ? '🧠' : nothing;
 
     return html`
       <div class="message ${this.role} ${this.thinking ? 'thinking' : ''}">

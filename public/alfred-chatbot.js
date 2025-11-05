@@ -81,7 +81,7 @@ export class AlfredChatbot extends LitElement {
 
     const lastMessage = { role: "assistant", content: this.incomingMessage };
     const response = html`
-      <alfred-chat-message thinking=${ifDefined(this.isThinking ?? undefined)} role="${lastMessage.role}" message=${lastMessage.content}></alfred-chat-message>
+      <alfred-chat-message thinking=${ifDefined(this.isThinking || undefined)} role="${lastMessage.role}" message=${lastMessage.content}></alfred-chat-message>
     `;
 
     return html`
