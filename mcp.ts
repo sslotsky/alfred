@@ -1,10 +1,10 @@
-import readline from "readline";
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import {
   Ollama,
   type GenerateResponse,
   type AbortableAsyncIterator,
+  type Tool,
 } from "ollama";
 import {
   CallToolRequestSchema,
@@ -370,204 +370,199 @@ const server = new Server(
   }
 );
 
+export const tools: Tool[] = [
+  {
+    type: "function",
+    function: {
+      name: "analyze_startup_costs",
+      description: "Analyzes startup costs for a business.",
+      type: "function",
+      parameters: {
+        type: "object",
+        properties: {
+          businessType: {
+            type: "string",
+            description:
+              "Type of business (e.g., retail, tech, service).",
+          },
+          location: {
+            type: "string",
+            description: "Location of the business.",
+          },
+          targetMarket: {
+            type: "string",
+            description:
+              "Description of the target customer base.",
+          },
+        },
+        required: ["businessType", "location"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "calculate_break_even",
+      description:
+        "Calculates the break-even point for a business.",
+      type: "function",
+      parameters: {
+        type: "object",
+        properties: {
+          fixedCosts: {
+            type: "number",
+            description: "Monthly fixed costs in dollars.",
+          },
+          variableCostPerUnit: {
+            type: "number",
+            description:
+              "Variable cost per unit in dollars.",
+          },
+          sellingPricePerUnit: {
+            type: "number",
+            description:
+              "Selling price per unit in dollars.",
+          },
+        },
+        required: [
+          "fixedCosts",
+          "variableCostPerUnit",
+          "sellingPricePerUnit",
+        ],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "generate_business_plan",
+      description:
+        "Generates a comprehensive business plan.",
+      type: "function",
+      parameters: {
+        type: "object",
+        properties: {
+          businessName: {
+            type: "string",
+            description: "Name of the business.",
+          },
+          industry: {
+            type: "string",
+            description:
+              "Industry or market the business operates in.",
+          },
+          totalInitialInvestment: {
+            type: "number",
+            description:
+              "Total initial investment required.",
+          },
+          breakEvenTimeline: {
+            type: "string",
+            description:
+              "Estimated time to reach break-even point.",
+          },
+          ownerBackground: {
+            type: "string",
+            description:
+              "Background and experience of the business owner.",
+          },
+        },
+        required: [
+          "businessName",
+          "industry",
+          "financialSummary",
+          "totalInitialInvestment",
+          "breakEvenTimeline",
+        ],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "competitive_analysis",
+      description:
+        "Analyzes the competitive landscape and identifies opportunities for a new business.",
+      type: "function",
+      parameters: {
+        type: "object",
+        properties: {
+          industry: {
+            type: "string",
+            description:
+              "Industry or market the business operates in.",
+          },
+          targetMarket: {
+            type: "string",
+            description:
+              "Description of the target customer base.",
+          },
+          uniqueValueProposition: {
+            type: "string",
+            description:
+              "What makes the business unique in the market.",
+          },
+        },
+        required: ["industry", "targetMarket"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "funding_strategy",
+      description:
+        "Develops a funding strategy for the business, including sources and timelines.",
+      type: "function",
+      parameters: {
+        type: "object",
+        properties: {
+          businessStage: {
+            type: "string",
+            enum: [
+              "idea",
+              "prototype",
+              "launch",
+              "growth",
+              "scaling",
+            ],
+            description: "Current stage of the business.",
+          },
+          fundingNeeds: {
+            type: "number",
+            description:
+              "Total amount of funding required.",
+          },
+          fundingSources: {
+            type: "array",
+            items: {
+              type: "string",
+              description:
+                "List of potential funding sources (e.g., investors, loans, grants).",
+            },
+          },
+          timeline: {
+            type: "string",
+            description:
+              "Estimated timeline for securing funding.",
+          },
+        },
+        required: [
+          "businessStage",
+          "fundingNeeds",
+          "fundingSources",
+        ],
+      },
+    },
+  },
+];
+
 // Tool definitions
 server.setRequestHandler(
   ListToolsRequestSchema,
   async () => {
     return {
-      tools: [
-        {
-          name: "analyze_startup_costs",
-          description:
-            "Analyzes startup costs for a new business based on industry, location, and business model. Provides detailed breakdown of initial investment needed.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              business_type: {
-                type: "string",
-                description:
-                  "Type of business (e.g., restaurant, retail store, online business, service-based)",
-              },
-              location: {
-                type: "string",
-                description:
-                  "Business location (city/state or 'online')",
-              },
-              scale: {
-                type: "string",
-                enum: ["micro", "small", "medium"],
-                description:
-                  "Scale of business: micro (home-based/very small), small (storefront/small team), medium (multiple employees/locations)",
-              },
-              additional_details: {
-                type: "string",
-                description:
-                  "Any additional details about the business concept",
-              },
-            },
-            required: [
-              "business_type",
-              "location",
-              "scale",
-            ],
-          },
-        },
-        {
-          name: "calculate_break_even",
-          description:
-            "Calculates break-even point and profitability timeline based on costs, pricing, and sales projections.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              monthly_fixed_costs: {
-                type: "number",
-                description:
-                  "Total monthly fixed costs (rent, utilities, insurance, etc.)",
-              },
-              variable_cost_per_unit: {
-                type: "number",
-                description:
-                  "Variable cost per unit/service",
-              },
-              price_per_unit: {
-                type: "number",
-                description:
-                  "Selling price per unit/service",
-              },
-              estimated_monthly_units: {
-                type: "number",
-                description:
-                  "Estimated units sold per month",
-              },
-              startup_costs: {
-                type: "number",
-                description:
-                  "Total initial startup investment",
-              },
-            },
-            required: [
-              "monthly_fixed_costs",
-              "variable_cost_per_unit",
-              "price_per_unit",
-              "estimated_monthly_units",
-              "startup_costs",
-            ],
-          },
-        },
-        {
-          name: "generate_business_plan",
-          description:
-            "Generates a comprehensive, loan-ready business plan using a local LLM. Creates a professional document suitable for presenting to lenders and investors.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              business_name: {
-                type: "string",
-                description: "Name of the business",
-              },
-              business_type: {
-                type: "string",
-                description: "Type/industry of business",
-              },
-              business_description: {
-                type: "string",
-                description:
-                  "Detailed description of the business concept and what makes it unique",
-              },
-              target_market: {
-                type: "string",
-                description:
-                  "Description of target customers and market",
-              },
-              financial_summary: {
-                type: "object",
-                description:
-                  "Financial information including startup costs, projections, etc.",
-                properties: {
-                  startup_costs: { type: "number" },
-                  loan_amount_needed: { type: "number" },
-                  monthly_revenue_projection: {
-                    type: "number",
-                  },
-                  break_even_timeline: { type: "string" },
-                },
-              },
-              owner_background: {
-                type: "string",
-                description:
-                  "Background and qualifications of the business owner(s)",
-              },
-              additional_info: {
-                type: "string",
-                description:
-                  "Any additional relevant information",
-              },
-            },
-            required: [
-              "business_name",
-              "business_type",
-              "business_description",
-              "target_market",
-              "financial_summary",
-            ],
-          },
-        },
-        {
-          name: "competitive_analysis",
-          description:
-            "Analyzes the competitive landscape for a business idea and provides strategic recommendations.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              business_type: {
-                type: "string",
-                description: "Type of business to analyze",
-              },
-              location: {
-                type: "string",
-                description: "Geographic market location",
-              },
-              unique_value_proposition: {
-                type: "string",
-                description:
-                  "What makes this business different from competitors",
-              },
-            },
-            required: ["business_type", "location"],
-          },
-        },
-        {
-          name: "funding_strategy",
-          description:
-            "Provides guidance on funding options and strategies for securing capital, including loan preparation tips.",
-          inputSchema: {
-            type: "object",
-            properties: {
-              funding_needed: {
-                type: "number",
-                description: "Amount of funding needed",
-              },
-              business_stage: {
-                type: "string",
-                enum: ["idea", "startup", "early_growth"],
-                description:
-                  "Current stage of the business",
-              },
-              credit_situation: {
-                type: "string",
-                description:
-                  "Brief description of owner's credit and financial situation",
-              },
-              collateral_available: {
-                type: "string",
-                description:
-                  "Description of any collateral or assets available",
-              },
-            },
-            required: ["funding_needed", "business_stage"],
-          },
-        },
-      ],
+      tools,
     };
   }
 );
@@ -644,8 +639,3 @@ async function main() {
   console.error(`Using Ollama at: ${OLLAMA_API_URL}`);
   console.error(`Model: ${OLLAMA_MODEL}`);
 }
-
-main().catch((error) => {
-  console.error("Fatal error:", error);
-  process.exit(1);
-});
