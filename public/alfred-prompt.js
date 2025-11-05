@@ -32,7 +32,7 @@ export class AlfredPrompt extends LitElement {
     this.addEventListener('keyup', e => {
       if (e.key === "Enter" && !e.shiftKey && !this.paused) {
         const child = this.getSlotContent();
-        const event = new CustomEvent('alfred-prompt-submitted', { detail: { text: child.textContent }});
+        const event = new CustomEvent('alfred-prompt-submitted', { detail: { text: child.innerText }});
         document.dispatchEvent(event);
         child.textContent = '';
       }

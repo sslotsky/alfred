@@ -1,6 +1,6 @@
 import { type Message, Ollama } from "ollama";
 import { PassThrough } from "stream";
-import rehypeStarryNight from "rehype-starry-night";
+import highlight from "rehype-highlight";
 import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
@@ -46,7 +46,7 @@ async function getMarkdown(content: string) {
   const file = await unified()
     .use(remarkParse)
     .use(remarkRehype)
-    .use(rehypeStarryNight)
+    .use(highlight)
     .use(rehypeStringify)
     .process(content);
 

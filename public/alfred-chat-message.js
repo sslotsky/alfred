@@ -1,58 +1,41 @@
 
-import { LitElement, html, css, nothing } from 'lit';
+import { LitElement, html, css, unsafeCSS, nothing } from 'lit';
 import { unsafeHTML } from 'lit/directives/unsafe-html.js';
 
 import remarkRehype from 'https://esm.sh/remark-rehype?bundle'
 // import rehypeStarryNight from 'https://esm.sh/rehype-starry-night?bundle'
+import highlight from 'https://esm.sh/rehype-highlight?bundle';
 import rehypeStringify from "https://esm.sh/rehype-stringify?bundle";
 import remarkParse from "https://esm.sh/remark-parse?bundle";
 import { unified } from "https://esm.sh/unified?bundle";
+
+function getSheet(href) {
+  const sheet = Array.from(document.styleSheets)
+    .find(sheet => sheet.href === href);
+
+  const cssText = Array.from(sheet.cssRules)
+    .filter(rule => rule.constructor.name !== "CSSImportRule")
+    .map(rule => rule.cssText)
+  .join(" ");
+    
+  return css`${unsafeCSS(cssText)}`;
+}
 
 function getMarkdown(content) {
   const processor = unified()
     .use(remarkParse)
     .use(remarkRehype)
-    // .use(rehypeStarryNight)
+    .use(highlight)
     .use(rehypeStringify);
 
   return String(processor.processSync(content));
 }
 
 export class AlfredChatMessage extends LitElement {
-  static styles = css`
-    .message {
-      display: grid;
-      grid-template-columns: 5rem auto;
-      width: 100%;
-      padding: 0.25rem;
-    }
-
-    .message .message-content pre {
-      margin-block: 0;
-    }
-
-    .message .role {
-      font-size: 0;
-    }
-
-    .message.user {
-      filter: brightness(1.5);
-    }
-
-    .message.user .role {
-      border: 2px solid var(--text-color);
-      width: 2rem;
-      text-align: center;
-      border-radius: 100%;
-      height: 2.25rem;
-      padding: 0.25rem;
-    }
-
-    .message.user .role::first-letter {
-      font-size: 2rem;
-      text-transform: capitalize;
-    }
-
+  static styles = [
+  getSheet("https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"),
+  getSheet(`${location.protocol}//${location.host}/styles.css`),
+  css`
     .message.assistant.thinking .role {
       font-size: 2.5rem;
       height: 5rem;
@@ -71,7 +54,7 @@ export class AlfredChatMessage extends LitElement {
       64%  { transform: scale(1,1)      translateY(0); }
       100% { transform: scale(1,1)      translateY(0); }
     }
-  `;
+  `];
 
   static properties = {
     message: {},
