@@ -16,7 +16,7 @@ function getSheet(href) {
   const cssText = Array.from(sheet.cssRules)
     .filter(rule => rule.constructor.name !== "CSSImportRule")
     .map(rule => rule.cssText)
-  .join(" ");
+    .join(" ");
     
   return css`${unsafeCSS(cssText)}`;
 }

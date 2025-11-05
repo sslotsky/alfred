@@ -86,6 +86,10 @@ body {
   filter: brightness(1.5);
 }
 
+.message.user pre {
+  filter: brightness(0.8);
+}
+
 .message.user .role {
   border: 2px solid var(--text-color);
   width: 2rem;
