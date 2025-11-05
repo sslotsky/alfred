@@ -1,10 +1,12 @@
 import { LitElement, html, nothing } from 'lit';
+import { ifDefined } from 'lit/directives/if-defined.js';
 
 export class AlfredChatbot extends LitElement {
   static properties = {
     messages: { state: true },
     incomingMessage: { state: true },
     isEmpty: { state: true },
+    isThinking: { state: true },
   };
 
   constructor() {
@@ -26,6 +28,7 @@ export class AlfredChatbot extends LitElement {
 
     const thinking = new CustomEvent('alfred-chatbot-thinking');
     document.dispatchEvent(thinking);
+    this.isThinking = true;
 
     fetch('/chat', {
       method: 'POST',
@@ -52,6 +55,7 @@ export class AlfredChatbot extends LitElement {
 
       const doneThinking = new CustomEvent('alfred-chatbot-done');
       document.dispatchEvent(doneThinking);
+      this.isThinking = false;
     });
   }
 
@@ -77,7 +81,7 @@ export class AlfredChatbot extends LitElement {
 
     const lastMessage = { role: "assistant", content: this.incomingMessage };
     const response = html`
-      <alfred-chat-message role="${lastMessage.role}" message=${lastMessage.content}></alfred-chat-message>
+      <alfred-chat-message thinking=${ifDefined(this.isThinking ?? undefined)} role="${lastMessage.role}" message=${lastMessage.content}></alfred-chat-message>
     `;
 
     return html`

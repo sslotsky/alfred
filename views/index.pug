@@ -43,8 +43,9 @@ html
       div(class='scroll-container')
         alfred-chatbot
           each message in messages
+            - var roleIsUser = message.role === "user"
             div(class=`message ${message.role}`)
-              span(class="role")= message.role + ":"
+              span(class="role")= roleIsUser ? "🧑🏽‍💻" : ""
               span(class="message-content")
                 | !{message.content ? message.content : message.thinking}
       div(class="prompt-container")
