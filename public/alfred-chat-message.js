@@ -71,11 +71,12 @@ export class AlfredChatMessage extends LitElement {
 
   render() {
     const leftSide = this.role === 'user' ? '👨🏽‍💻' : this.thinking ? '🧠' : nothing;
+    const content = this.thinking && !this.message ? html`<span class="ellipse">Thinking</span>` : unsafeHTML(getMarkdown(this.message));
 
     return html`
       <div class="message ${this.role} ${this.thinking ? 'thinking' : ''}">
         <span class="role">${leftSide}</span>
-        <span class="message-content">${unsafeHTML(getMarkdown(this.message))}</span>
+        <span class="message-content">${content}</span>
       </div>`;
   }
 }
