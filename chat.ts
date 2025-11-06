@@ -67,7 +67,10 @@ async function getMarkdown(content: string) {
         node.children.push({
           tagName: "alfred-copy-code",
           properties: {
-            rawText: toText(code),
+            rawText: toText(code, {
+              // @ts-ignore
+              whitespace: "preserve",
+            }),
           },
           type: "element",
           children: [],

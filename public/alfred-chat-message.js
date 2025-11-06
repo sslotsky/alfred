@@ -30,7 +30,7 @@ function getMarkdown(content) {
     .use(remarkRehype)
     .use(highlight)
     .use(() => (tree) => {
-      visit(tree, ["element"], (node, index, parent) => {
+      visit(tree, ["element"], (node) => {
         if (!isElement(node, "pre")) {
           return;
         }
@@ -40,10 +40,11 @@ function getMarkdown(content) {
           return;
         }
 
+        console.log(code)
         node.children.push({
           tagName: "alfred-copy-code",
           properties: {
-            rawText: toText(code),
+            rawText: toText(code, { whitespace: 'preserve' }),
           },
           type: "element",
           children: [],
