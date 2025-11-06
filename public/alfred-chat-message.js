@@ -8,6 +8,9 @@ import highlight from 'https://esm.sh/rehype-highlight?bundle';
 import rehypeStringify from "https://esm.sh/rehype-stringify?bundle";
 import remarkParse from "https://esm.sh/remark-parse?bundle";
 import { unified } from "https://esm.sh/unified?bundle";
+import { visit } from "https://esm.sh/unist-util-visit?bundle";
+import { isElement } from "https://esm.sh/hast-util-is-element?bundle";
+import { toText } from "https://esm.sh/hast-util-to-text?bundle";
 
 function getSheet(href) {
   const sheet = Array.from(document.styleSheets)
@@ -26,6 +29,27 @@ function getMarkdown(content) {
     .use(remarkParse)
     .use(remarkRehype)
     .use(highlight)
+    .use(() => (tree) => {
+      visit(tree, ["element"], (node, index, parent) => {
+        if (!isElement(node, "pre")) {
+          return;
+        }
+
+        const code = node.children[0];
+        if (!isElement(code, "code")) {
+          return;
+        }
+
+        node.children.push({
+          tagName: "alfred-copy-code",
+          properties: {
+            rawText: toText(code),
+          },
+          type: "element",
+          children: [],
+        });
+      });
+    })
     .use(rehypeStringify);
 
   return String(processor.processSync(content));

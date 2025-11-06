@@ -23,10 +23,12 @@ html
       import { AlfredChatbot } from '/alfred-chatbot.js';
       import { AlfredPrompt } from '/alfred-prompt.js';
       import { AlfredChatMessage } from '/alfred-chat-message.js';
+      import { AlfredCopyCode } from '/alfred-copy-code.js';
 
       customElements.define('alfred-chatbot', AlfredChatbot);
       customElements.define('alfred-prompt', AlfredPrompt);
       customElements.define('alfred-chat-message', AlfredChatMessage);
+      customElements.define('alfred-copy-code', AlfredCopyCode);
 
       document.addEventListener('alfred-chatbot-thinking', () => {
         const window = document.querySelector('div.chat-window');
