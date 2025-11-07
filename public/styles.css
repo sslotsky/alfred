@@ -138,6 +138,14 @@ body {
   height: 2rem;
   width: 2rem;
   cursor: pointer;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+alfred-copy-code:hover {
+  transform: scale(1.3);
 }
 
 .message-content alfred-copy-code::after {
@@ -146,7 +154,7 @@ body {
 }
 
 .message-content alfred-copy-code.copied::after {
-  content: '✅ Copied!';
+  content: '✅';
 }
 
 alfred-prompt {

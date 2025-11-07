@@ -55,7 +55,7 @@ async function getMarkdown(content: string) {
     .use(rehypeStringify)
     // @ts-ignore
     .use(() => (tree: Root) => {
-      visit(tree, ["element"], (node, index, parent) => {
+      visit(tree, ["element"], (node) => {
         if (!isElement(node, "pre")) {
           return;
         }
