@@ -19,10 +19,10 @@ app.use(bodyParser.json());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
-    store: new MemoryStore({ checkPeriod: 60000 }),
+    store: new MemoryStore({ checkPeriod: 60000 * 60 }),
     resave: true,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 },
+    cookie: { maxAge: 60000 * 60 },
   })
 );
 
