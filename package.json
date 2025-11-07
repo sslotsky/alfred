@@ -26,6 +26,7 @@
     "highlight.js": "^11.11.1",
     "lit-element": "^4.2.1",
     "lit-html": "^3.3.1",
+    "memorystore": "^1.6.7",
     "multiparty": "^4.2.3",
     "ollama": "^0.6.0",
     "pug": "^3.0.3",

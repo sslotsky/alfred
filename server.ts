@@ -1,5 +1,6 @@
 import express, { type Handler } from "express";
 import session from "express-session";
+import makeMemoryStore from "memorystore";
 import { chat, getMessages } from "./chat.ts";
 import bodyParser from "body-parser";
 import multiparty from "multiparty";
@@ -10,12 +11,15 @@ import "dotenv/config";
 const app = express();
 const port = 3000;
 
+const MemoryStore = makeMemoryStore(session);
+
 app.set("view engine", "pug");
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
+    store: new MemoryStore({ checkPeriod: 60000 }),
     resave: true,
     saveUninitialized: true,
     cookie: { maxAge: 60000 },
