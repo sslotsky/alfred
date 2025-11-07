@@ -148,3 +148,25 @@ body {
 .message-content alfred-copy-code.copied::after {
   content: '✅ Copied!';
 }
+
+alfred-prompt {
+  position: relative;
+}
+
+alfred-prompt button.send {
+  position: absolute;
+  right: 0.5rem;
+  top: 0.5rem;
+  border-radius: 100%;
+  height: 2rem;
+  width: 2rem;
+  font-weight: bold;
+  background-color: inherit;
+  color: indianred;
+  cursor: pointer;
+}
+
+alfred-prompt button.send:hover {
+  transform: scale(1.05);
+  filter: brightness(1.5);
+}

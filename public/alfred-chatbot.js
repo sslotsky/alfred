@@ -15,7 +15,7 @@ export class AlfredChatbot extends LitElement {
     this.messages = [];
     this.incomingMessage = '';
     this.isEmpty = false;
-    this.name = '';
+    this.name = 'friend';
   }
 
   addMessage(message) {
