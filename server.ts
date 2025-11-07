@@ -21,7 +21,7 @@ app.use(
     secret: process.env.SESSION_SECRET,
     store: new MemoryStore({ checkPeriod: 60000 }),
     resave: true,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: { maxAge: 60000 },
   })
 );
