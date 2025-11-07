@@ -9,6 +9,7 @@ import { tools } from "./mcp.ts";
 import { visit } from "unist-util-visit";
 import { isElement } from "hast-util-is-element";
 import { toText } from "hast-util-to-text";
+import { type User } from "stytch";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
@@ -99,6 +100,7 @@ export async function getMessageHtml(
 export async function chat(
   prompt: string,
   sessionId: string,
+  user: User,
   writeStream: NodeJS.WritableStream
 ) {
   const stream = new PassThrough();
@@ -113,7 +115,13 @@ export async function chat(
   const answer = await entry.ollama.chat({
     stream: true,
     model: OLLAMA_MODEL,
-    messages: entry.messages,
+    messages: [
+      {
+        role: "user",
+        content: `I'm an authenticated user and my email address is ${user.emails[0].email}`,
+      },
+      ...entry.messages,
+    ],
     tools: tools.slice(0, 1),
   });
 

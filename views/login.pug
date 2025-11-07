@@ -1,0 +1,83 @@
+html
+  head
+    style.
+      div.container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        height: 100%;
+        justify-content: center;
+      }
+
+      div.container form {
+        border: 2px double var(--text-color);
+        border-radius: 5px;
+        width: 100%;
+        padding: 3rem;
+      }
+
+      div.container .form, alfred-login-form, form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      form input {
+        background-color: inherit;
+        color: inherit;
+        height: 2.5rem;
+        border-radius: 5px;
+        width: 15rem;
+        margin-bottom: 0.5rem;
+        padding: 0.5rem;
+      }
+
+      input[type="email"] {
+        border: inherit;
+      }
+
+      input[type="submit"] {
+        filter: drop-shadow(2px 4px 6px black);
+        cursor: pointer;
+      }
+
+      input[type="submit"]:hover {
+        transform: scale(1.05);
+        filter: brightness(1.5);
+      }
+
+      h2 {
+        margin: 0.5rem;
+      }
+
+    title Alfred Login
+    
+    link(href="/styles.css" rel="stylesheet")
+
+    script(type="module").
+        import { AlfredLoginForm } from '/alfred-login-form.js';
+
+        customElements.define('alfred-login-form', AlfredLoginForm);
+
+    script(type="importmap").
+      {
+        "imports": {
+          "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm",
+          "lit/": "https://cdn.jsdelivr.net/npm/lit@3/",
+          "lit-html": "https://cdn.jsdelivr.net/npm/lit-html@3/+esm",
+          "lit-html/": "https://cdn.jsdelivr.net/npm/lit-html@3/",
+          "lit-element": "https://cdn.jsdelivr.net/npm/lit-element@4/+esm",
+          "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
+          "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/+esm",
+          "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/"
+        }
+      }
+
+    body
+      div.container
+        div.form
+          alfred-login-form(doneMessage="Check your email!")
+            h2 Enter your email to log in
+            form
+              input(name="email" type="email" placeholder="Email" autocomplete required)
+              input(type="submit" value="Get Magic Link")

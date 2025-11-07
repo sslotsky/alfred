@@ -43,7 +43,7 @@ html
   body
     div(class='chat-window')
       div(class='scroll-container')
-        alfred-chatbot
+        alfred-chatbot(name=user.emails[0].email)
           each message in messages
             - var roleIsUser = message.role === "user"
             div(class=`message ${message.role}`)

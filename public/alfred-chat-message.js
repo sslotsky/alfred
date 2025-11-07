@@ -40,7 +40,6 @@ function getMarkdown(content) {
           return;
         }
 
-        console.log(code)
         node.children.push({
           tagName: "alfred-copy-code",
           properties: {

@@ -1,8 +1,14 @@
 body {
   --text-color: #a49c9c;
+  --base-font-size: 1.25rem;
   background-color: #1e2121;
   color: var(--text-color);
-  font-size: 1.25rem;
+  font-size: var(--base-font-size);
+}
+
+* {
+  font-family: "Gill Sans";
+  font-style: sans-serif;
 }
 
 .chat-window {
@@ -26,7 +32,7 @@ body {
   inherits: false;
 }
 
-.chat-window.thinking {
+.chat-window.thinking, div.container form.thinking {
   --angle: 0deg;
   border-image: conic-gradient(from var(--angle), red, yellow, lime, aqua, blue, magenta, red) 1;
   animation: 5s rotate linear infinite;

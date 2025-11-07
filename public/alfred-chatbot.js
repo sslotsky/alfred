@@ -7,6 +7,7 @@ export class AlfredChatbot extends LitElement {
     incomingMessage: { state: true },
     isEmpty: { state: true },
     isThinking: { state: true },
+    name: {}
   };
 
   constructor() {
@@ -14,6 +15,7 @@ export class AlfredChatbot extends LitElement {
     this.messages = [];
     this.incomingMessage = '';
     this.isEmpty = false;
+    this.name = '';
   }
 
   addMessage(message) {
@@ -85,8 +87,8 @@ export class AlfredChatbot extends LitElement {
     `;
 
     return html`
-      <slot @slotchange=${this.handleSlotChange}></slot>
-      ${this.isEmpty ? "Ask me a question!" : nothing}
+      <slot></slot>
+      ${this.isEmpty ? `Hello ${this.name}! Please, ask me a question!` : nothing}
       ${messageHtml}
       ${response}
     `;

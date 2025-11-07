@@ -17,6 +17,7 @@
     "@modelcontextprotocol/sdk": "^1.20.2",
     "@types/mdast": "^4.0.4",
     "body-parser": "^2.2.0",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
     "hast-util-is-element": "^3.0.0",
@@ -25,12 +26,14 @@
     "highlight.js": "^11.11.1",
     "lit-element": "^4.2.1",
     "lit-html": "^3.3.1",
+    "multiparty": "^4.2.3",
     "ollama": "^0.6.0",
     "pug": "^3.0.3",
     "rehype-highlight": "^7.0.2",
     "rehype-stringify": "^10.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
+    "stytch": "^12.43.0",
     "to-vfile": "^8.0.0",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.0.0",
@@ -42,6 +45,7 @@
     "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
     "@types/hast": "^3.0.4",
+    "@types/multiparty": "^4.2.1",
     "@types/node": "^24.9.2"
   }
 }

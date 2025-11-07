@@ -12,7 +12,6 @@ export class AlfredCopyCode extends LitElement {
   }
 
   handleClick = (e) => {
-    console.log(this.rawtext);
     navigator.clipboard.writeText(this.rawtext).then(() => {
       this.classList.add('copied');
       setTimeout(() => {
