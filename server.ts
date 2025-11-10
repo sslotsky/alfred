@@ -95,6 +95,7 @@ app.get("/authenticate", (req, res) => {
 async function getAuthenticatedUser(req: Request) {
   const sessionToken = req.session.StytchSessionToken;
   if (!sessionToken) {
+    console.log("session token not found");
     return null;
   }
 
