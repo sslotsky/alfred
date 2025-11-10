@@ -102,7 +102,11 @@ async function getAuthenticatedUser(req: Request) {
   const resp = await stytchClient.sessions.authenticate({
     session_token: sessionToken,
   });
-  if (resp.status_code !== 200) {
+  if (
+    resp.status_code !== 200 ||
+    !resp.session_token ||
+    !resp.user
+  ) {
     console.log("Session invalid or expired");
     req.session.StytchSessionToken = undefined;
     return null;
