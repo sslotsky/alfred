@@ -32,8 +32,11 @@ export class AlfredLoginForm extends LitElement {
     fetch('/login', {
       method: 'POST',
       body: d
-    }).then(r => {
+    }).then(() => {
       this.sent = true;
+    }).catch(e => {
+      console.error('Magic link failed', e);
+      submit.disabled = false;
     })
   }
 

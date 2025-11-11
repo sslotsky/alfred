@@ -39,6 +39,11 @@ export class AlfredChatbot extends LitElement {
         'Content-Type': 'application/json'
       }
     }).then(async res => {
+      if (res.redirected) {
+        window.location = res.url;
+        return;
+      }
+
       const stream = res.body.getReader();
       let { done, value } = await stream.read();
       this.incomingMessage = '';

@@ -1,6 +1,7 @@
 import express, { type Handler } from "express";
 import session from "express-session";
-import makeMemoryStore from "memorystore";
+import { RedisStore } from "connect-redis";
+import { createClient } from "redis";
 import { chat, getMessages } from "./chat.ts";
 import bodyParser from "body-parser";
 import multiparty from "multiparty";
@@ -10,8 +11,16 @@ import "dotenv/config";
 
 const app = express();
 const port = 3000;
+const sessionLife = 1000 * 60 * 60 * 6; // 6 hours
 
-const MemoryStore = makeMemoryStore(session);
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
+});
+
+redisClient.connect().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
 
 app.set("view engine", "pug");
 app.use(express.static("public"));
@@ -19,10 +28,13 @@ app.use(bodyParser.json());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
-    store: new MemoryStore({ checkPeriod: 60000 * 60 }),
+    store: new RedisStore({
+      client: redisClient,
+      prefix: "alfred",
+    }),
     resave: true,
     saveUninitialized: false,
-    cookie: { maxAge: 60000 * 60 },
+    cookie: { maxAge: sessionLife },
   })
 );
 
