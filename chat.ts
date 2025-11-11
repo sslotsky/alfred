@@ -5,7 +5,11 @@ import rehypeStringify from "rehype-stringify";
 import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
-import { tools } from "./mcp.ts";
+import {
+  tools,
+  analyzeStartupCosts,
+  type AnalyzeStartupCostsArgs,
+} from "./mcp.ts";
 import { visit } from "unist-util-visit";
 import { isElement } from "hast-util-is-element";
 import { toText } from "hast-util-to-text";
@@ -112,13 +116,9 @@ export async function chat(
     content: prompt,
   });
 
-  const answer = await entry.ollama.chat({
-    stream: true,
-    model: OLLAMA_MODEL,
-    messages: [
-      {
-        role: "system",
-        content: `
+  const introMessage = {
+    role: "system",
+    content: `
 Your name is Alfred and you can think of yourself as a digital butler for the user, ${user.emails[0].email}.
 Your job is to serve the user's every request, in a polite and dignified manner befitting of a butler.
 
@@ -126,16 +126,25 @@ You are also an expert in business, and you're learning to produce business plan
 to one tool, which provides the user with a startup cost analysis. Users will have to provide some information
 in order for you to use this tool.
 `,
-      },
-      ...entry.messages,
-    ],
+  };
+
+  const answer = await entry.ollama.chat({
+    stream: true,
+    model: OLLAMA_MODEL,
+    messages: [introMessage, ...entry.messages],
     tools: tools.slice(0, 1),
   });
 
   stream.pipe(writeStream);
   let isThinking = true;
 
+  const toolCalls = [];
+
   for await (const part of answer) {
+    if (part.message.tool_calls) {
+      toolCalls.push(...part.message.tool_calls);
+    }
+
     if (part.message.thinking) {
       thinking += part.message.thinking;
       stream.write(part.message.thinking);
@@ -152,7 +161,49 @@ in order for you to use this tool.
     role: "assistant",
     content,
     thinking,
+    tool_calls: toolCalls,
   });
+
+  const toolMessages = toolCalls.map((call) => {
+    if (call.function.name !== "analyze_startup_costs") {
+      throw new Error(
+        `Unsupported tool ${call.function.name}`
+      );
+    }
+
+    const result = analyzeStartupCosts(
+      call.function.arguments as AnalyzeStartupCostsArgs
+    );
+    return {
+      role: "tool",
+      tool_name: call.function.name,
+      content: result,
+    };
+  });
+
+  entry.messages.push(...toolMessages);
+
+  if (toolMessages.length) {
+    const newAnswer = await entry.ollama.chat({
+      stream: true,
+      think: true,
+      model: OLLAMA_MODEL,
+      messages: [introMessage, ...entry.messages],
+    });
+
+    for await (const part of answer) {
+      if (part.message.thinking) {
+        thinking += part.message.thinking;
+        stream.write(part.message.thinking);
+      } else if (part.message.content) {
+        if (isThinking) {
+          isThinking = false;
+        }
+        content += part.message.content;
+        stream.write(part.message.content);
+      }
+    }
+  }
 
   stream.write(content);
   stream.end();

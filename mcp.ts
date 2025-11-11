@@ -34,7 +34,7 @@ async function callOllama(prompt: string) {
 }
 
 // Type definitions for tool arguments
-type AnalyzeStartupCostsArgs = {
+export type AnalyzeStartupCostsArgs = {
   business_type: string;
   location: string;
   scale: "micro" | "small" | "medium";
@@ -78,7 +78,7 @@ type FundingStrategyArgs = {
 };
 
 // Tool handler functions
-async function analyzeStartupCosts(
+export function analyzeStartupCosts(
   args: AnalyzeStartupCostsArgs
 ) {
   const prompt = `You are an expert business consultant specializing in startup cost analysis. Analyze the startup costs for the following business:
@@ -102,7 +102,7 @@ Provide a detailed breakdown of:
 
 Give specific dollar ranges for each category based on the business type and scale. Be realistic and comprehensive.`;
 
-  return await callOllama(prompt);
+  return prompt;
 }
 
 async function calculateBreakEven(
@@ -568,67 +568,67 @@ server.setRequestHandler(
 );
 
 // Tool execution handler
-server.setRequestHandler(
-  CallToolRequestSchema,
-  async (request) => {
-    const { name, arguments: args } = request.params;
+// server.setRequestHandler(
+//   CallToolRequestSchema,
+//   async (request) => {
+//     const { name, arguments: args } = request.params;
 
-    try {
-      let result: AbortableAsyncIterator<GenerateResponse>;
+//     try {
+//       let result: AbortableAsyncIterator<GenerateResponse>;
 
-      switch (name) {
-        case "analyze_startup_costs":
-          result = await analyzeStartupCosts(
-            args as AnalyzeStartupCostsArgs
-          );
-          break;
-        case "generate_business_plan":
-          result = await generateBusinessPlan(
-            args as GenerateBusinessPlanArgs
-          );
-          break;
+//       switch (name) {
+//         case "analyze_startup_costs":
+//           result = analyzeStartupCosts(
+//             args as AnalyzeStartupCostsArgs
+//           );
+//           break;
+//         case "generate_business_plan":
+//           result = await generateBusinessPlan(
+//             args as GenerateBusinessPlanArgs
+//           );
+//           break;
 
-        case "competitive_analysis":
-          result = await competitiveAnalysis(
-            args as CompetitiveAnalysisArgs
-          );
-          break;
+//         case "competitive_analysis":
+//           result = await competitiveAnalysis(
+//             args as CompetitiveAnalysisArgs
+//           );
+//           break;
 
-        case "funding_strategy":
-          result = await fundingStrategy(
-            args as FundingStrategyArgs
-          );
-          break;
+//         case "funding_strategy":
+//           result = await fundingStrategy(
+//             args as FundingStrategyArgs
+//           );
+//           break;
 
-        default:
-          throw new Error(`Unknown tool: ${name}`);
-      }
+//         default:
+//           throw new Error(`Unknown tool: ${name}`);
+//       }
 
-      return {
-        content: [
-          {
-            type: "text",
-            text: result,
-          },
-        ],
-      };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : String(error);
-      return {
-        content: [
-          {
-            type: "text",
-            text: `Error: ${errorMessage}`,
-          },
-        ],
-        isError: true,
-      };
-    }
-  }
-);
+//       return {
+//         content: [
+//           {
+//             type: "text",
+//             text: result,
+//           },
+//         ],
+//       };
+//     } catch (error) {
+//       const errorMessage =
+//         error instanceof Error
+//           ? error.message
+//           : String(error);
+//       return {
+//         content: [
+//           {
+//             type: "text",
+//             text: `Error: ${errorMessage}`,
+//           },
+//         ],
+//         isError: true,
+//       };
+//     }
+//   }
+// );
 
 async function main() {
   const transport = new StdioServerTransport();

@@ -39,11 +39,15 @@ app.use(
 );
 
 const authMiddleware: Handler = async (req, res, next) => {
-  const user = await getAuthenticatedUser(req);
+  try {
+    const user = await getAuthenticatedUser(req);
 
-  if (user) {
-    req.session.user = user;
-    return next();
+    if (user) {
+      req.session.user = user;
+      return next();
+    }
+  } catch (e) {
+    console.error(e);
   }
 
   res.redirect("/");
@@ -129,9 +133,13 @@ async function getAuthenticatedUser(req: Request) {
 }
 
 app.get("/", async (req, resp) => {
-  const user = await getAuthenticatedUser(req);
-  if (user) {
-    return resp.redirect("/chat");
+  try {
+    const user = await getAuthenticatedUser(req);
+    if (user) {
+      return resp.redirect("/chat");
+    }
+  } catch (e) {
+    console.error(e);
   }
 
   resp.render("login");
