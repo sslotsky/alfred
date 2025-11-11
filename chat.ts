@@ -42,11 +42,16 @@ async function getEntry(sessionId: string): Promise<Entry> {
     messages: [],
   };
 
+  saveEntry(sessionId, newEntry);
+
+  return newEntry;
+}
+
+function saveEntry(sessionId: string, e: Entry) {
   redisClient.set(
     `${sessionId}-messages`,
-    JSON.stringify(newEntry)
+    JSON.stringify(e)
   );
-  return newEntry;
 }
 
 export async function getMessages(
@@ -124,6 +129,8 @@ export async function chat(
     content: prompt,
   });
 
+  saveEntry(sessionId, entry);
+
   const introMessage = {
     role: "system",
     content: `
@@ -171,6 +178,8 @@ in order for you to use this tool.
     thinking,
     tool_calls: toolCalls,
   });
+
+  saveEntry(sessionId, entry);
 
   // const toolMessages = toolCalls.map((call) => {
   //   if (call.function.name !== "analyze_startup_costs") {
