@@ -52,7 +52,7 @@ body {
   padding: 0.25rem;
   margin-top: auto;
   overflow: auto;
-  min-height: 3rem;
+  min-height: 2.5rem;
 }
 
 .prompt {

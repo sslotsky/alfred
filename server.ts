@@ -1,21 +1,17 @@
 import express, { type Handler } from "express";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
-import { createClient } from "redis";
 import { chat, getMessages } from "./chat.ts";
 import bodyParser from "body-parser";
 import multiparty from "multiparty";
 import stytch from "stytch";
 import { type Request } from "express";
 import "dotenv/config";
+import { redisClient } from "./redis.ts";
 
 const app = express();
 const port = 3000;
 const sessionLife = 1000 * 60 * 60 * 6; // 6 hours
-
-const redisClient = createClient({
-  url: process.env.REDIS_URL,
-});
 
 redisClient.connect().catch((e) => {
   console.error(e);

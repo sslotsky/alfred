@@ -14,40 +14,48 @@ import { visit } from "unist-util-visit";
 import { isElement } from "hast-util-is-element";
 import { toText } from "hast-util-to-text";
 import { type User } from "stytch";
+import { redisClient } from "./redis.ts";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3";
 
-type Entry = { ollama: Ollama; messages: Message[] };
-type ChatMap = Map<string, Entry>;
+type Entry = { messages: Message[] };
 
-const map: ChatMap = new Map();
+const ollama = new Ollama({
+  host: OLLAMA_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
-function getEntry(sessionId: string) {
-  const entry = map.get(sessionId);
+async function getEntry(sessionId: string): Promise<Entry> {
+  const entry = await redisClient.get(
+    `${sessionId}-messages`
+  );
+
   if (entry) {
-    return entry;
+    return JSON.parse(entry) as Entry;
   }
 
   const newEntry: Entry = {
-    ollama: new Ollama({
-      host: OLLAMA_API_URL,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }),
     messages: [],
   };
 
-  map.set(sessionId, newEntry);
+  redisClient.set(
+    `${sessionId}-messages`,
+    JSON.stringify(newEntry)
+  );
   return newEntry;
 }
 
 export async function getMessages(
   sessionId: string
 ): Promise<Message[]> {
-  const entry = map.get(sessionId);
+  const json = await redisClient.get(
+    `${sessionId}-messages`
+  );
+  const entry = JSON.parse(json ?? "{}") as Entry;
   return getMessageHtml(entry?.messages ?? []);
 }
 
@@ -110,7 +118,7 @@ export async function chat(
   const stream = new PassThrough();
   let [thinking, content] = ["", ""];
 
-  const entry = getEntry(sessionId);
+  const entry = await getEntry(sessionId);
   entry.messages.push({
     role: "user",
     content: prompt,
@@ -128,7 +136,7 @@ in order for you to use this tool.
 `,
   };
 
-  const answer = await entry.ollama.chat({
+  const answer = await ollama.chat({
     stream: true,
     model: OLLAMA_MODEL,
     messages: [introMessage, ...entry.messages],
