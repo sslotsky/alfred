@@ -164,46 +164,46 @@ in order for you to use this tool.
     tool_calls: toolCalls,
   });
 
-  const toolMessages = toolCalls.map((call) => {
-    if (call.function.name !== "analyze_startup_costs") {
-      throw new Error(
-        `Unsupported tool ${call.function.name}`
-      );
-    }
+  // const toolMessages = toolCalls.map((call) => {
+  //   if (call.function.name !== "analyze_startup_costs") {
+  //     throw new Error(
+  //       `Unsupported tool ${call.function.name}`
+  //     );
+  //   }
 
-    const result = analyzeStartupCosts(
-      call.function.arguments as AnalyzeStartupCostsArgs
-    );
-    return {
-      role: "tool",
-      tool_name: call.function.name,
-      content: result,
-    };
-  });
+  //   const result = analyzeStartupCosts(
+  //     call.function.arguments as AnalyzeStartupCostsArgs
+  //   );
+  //   return {
+  //     role: "tool",
+  //     tool_name: call.function.name,
+  //     content: result,
+  //   };
+  // });
 
-  entry.messages.push(...toolMessages);
+  // entry.messages.push(...toolMessages);
 
-  if (toolMessages.length) {
-    const newAnswer = await entry.ollama.chat({
-      stream: true,
-      think: true,
-      model: OLLAMA_MODEL,
-      messages: [introMessage, ...entry.messages],
-    });
+  // if (toolMessages.length) {
+  //   const newAnswer = await entry.ollama.chat({
+  //     stream: true,
+  //     think: true,
+  //     model: OLLAMA_MODEL,
+  //     messages: [introMessage, ...entry.messages],
+  //   });
 
-    for await (const part of answer) {
-      if (part.message.thinking) {
-        thinking += part.message.thinking;
-        stream.write(part.message.thinking);
-      } else if (part.message.content) {
-        if (isThinking) {
-          isThinking = false;
-        }
-        content += part.message.content;
-        stream.write(part.message.content);
-      }
-    }
-  }
+  //   for await (const part of answer) {
+  //     if (part.message.thinking) {
+  //       thinking += part.message.thinking;
+  //       stream.write(part.message.thinking);
+  //     } else if (part.message.content) {
+  //       if (isThinking) {
+  //         isThinking = false;
+  //       }
+  //       content += part.message.content;
+  //       stream.write(part.message.content);
+  //     }
+  //   }
+  // }
 
   stream.write(content);
   stream.end();
