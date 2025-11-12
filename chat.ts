@@ -201,30 +201,32 @@ in order for you to use this tool.
   entry.messages.push(...toolMessages);
   saveEntry(sessionId, entry);
 
-  // if (toolMessages.length) {
-  //   const newAnswer = await ollama.chat({
-  //     stream: true,
-  //     think: true,
-  //     model: OLLAMA_MODEL,
-  //     messages: [introMessage, ...entry.messages],
-  //     format: "json",
-  //   });
+  if (toolMessages.length) {
+    const newAnswer = await ollama.chat({
+      stream: true,
+      think: true,
+      model: OLLAMA_MODEL,
+      messages: [introMessage, ...entry.messages],
+      format: "json",
+    });
 
-  //   for await (const part of answer) {
-  //     if (part.message.thinking) {
-  //       thinking += part.message.thinking;
-  //       stream.write(part.message.thinking);
-  //     } else if (part.message.content) {
-  //       if (isThinking) {
-  //         isThinking = false;
-  //       }
-  //       content += part.message.content;
-  //       stream.write(part.message.content);
-  //     }
-  //   }
-  // }
+    try {
+      for await (const part of answer) {
+        if (part.message.thinking) {
+          thinking += part.message.thinking;
+          stream.write(part.message.thinking);
+        } else if (part.message.content) {
+          content += part.message.content;
+          stream.write(part.message.content);
+        }
+      }
+    } catch (e) {
+      console.error(e);
+      answer.abort();
+    }
+  }
 
-  // saveEntry(sessionId, entry);
+  saveEntry(sessionId, entry);
 
   stream.write(content);
   stream.end();
