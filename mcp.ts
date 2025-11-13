@@ -64,7 +64,7 @@ type GenerateBusinessPlanArgs = {
   additional_info?: string;
 };
 
-type CompetitiveAnalysisArgs = {
+export type CompetitiveAnalysisArgs = {
   business_type: string;
   location: string;
   unique_value_proposition?: string;
@@ -288,7 +288,7 @@ Make this professional, realistic, and compelling. Use specific numbers where pr
   return prompt;
 }
 
-async function competitiveAnalysis(
+export function competitiveAnalysis(
   args: CompetitiveAnalysisArgs
 ) {
   const {
@@ -318,7 +318,7 @@ Provide:
 
 Be specific and actionable.`;
 
-  return await callOllama(prompt);
+  return prompt;
 }
 
 async function fundingStrategy(args: FundingStrategyArgs) {
@@ -432,9 +432,41 @@ export const calculateBreakEvenTool: Tool = {
   },
 };
 
+export const competitiveAnalysisTool: Tool = {
+  type: "function",
+  function: {
+    name: "competitive_analysis",
+    description:
+      "Analyzes the competitive landscape and identifies opportunities for a new business.",
+    type: "function",
+    parameters: {
+      type: "object",
+      properties: {
+        industry: {
+          type: "string",
+          description:
+            "Industry or market the business operates in.",
+        },
+        targetMarket: {
+          type: "string",
+          description:
+            "Description of the target customer base.",
+        },
+        uniqueValueProposition: {
+          type: "string",
+          description:
+            "What makes the business unique in the market.",
+        },
+      },
+      required: ["industry", "targetMarket"],
+    },
+  },
+};
+
 export const tools: Tool[] = [
   analyzeStartupCostTool,
   calculateBreakEvenTool,
+  competitiveAnalysisTool,
   {
     type: "function",
     function: {
@@ -473,40 +505,9 @@ export const tools: Tool[] = [
         required: [
           "businessName",
           "industry",
-          "financialSummary",
           "totalInitialInvestment",
           "breakEvenTimeline",
         ],
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "competitive_analysis",
-      description:
-        "Analyzes the competitive landscape and identifies opportunities for a new business.",
-      type: "function",
-      parameters: {
-        type: "object",
-        properties: {
-          industry: {
-            type: "string",
-            description:
-              "Industry or market the business operates in.",
-          },
-          targetMarket: {
-            type: "string",
-            description:
-              "Description of the target customer base.",
-          },
-          uniqueValueProposition: {
-            type: "string",
-            description:
-              "What makes the business unique in the market.",
-          },
-        },
-        required: ["industry", "targetMarket"],
       },
     },
   },

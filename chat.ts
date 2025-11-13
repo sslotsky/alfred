@@ -10,8 +10,11 @@ import {
   analyzeStartupCosts,
   calculateBreakEvenTool,
   calculateBreakEven,
+  competitiveAnalysisTool,
+  competitiveAnalysis,
   type AnalyzeStartupCostsArgs,
   type CalculateBreakEvenArgs,
+  type CompetitiveAnalysisArgs,
 } from "./mcp.ts";
 import { visit } from "unist-util-visit";
 import { isElement } from "hast-util-is-element";
@@ -153,7 +156,11 @@ some information in order for you to use these tools.
       stream: true,
       model: OLLAMA_MODEL,
       messages: [introMessage, ...entry.messages],
-      tools: [analyzeStartupCostTool],
+      tools: [
+        analyzeStartupCostTool,
+        calculateBreakEvenTool,
+        competitiveAnalysisTool,
+      ],
     });
 
     let isThinking = true;
@@ -213,6 +220,17 @@ some information in order for you to use these tools.
         const args = call.function
           .arguments as CalculateBreakEvenArgs;
         const result = calculateBreakEven(args);
+        entry.messages.push({
+          role: "tool",
+          tool_name: call.function.name,
+          content: result,
+        });
+      } else if (
+        call.function.name === competitiveAnalysis.name
+      ) {
+        const args = call.function
+          .arguments as CompetitiveAnalysisArgs;
+        const result = competitiveAnalysis(args);
         entry.messages.push({
           role: "tool",
           tool_name: call.function.name,
