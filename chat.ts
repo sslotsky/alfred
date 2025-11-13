@@ -6,7 +6,7 @@ import remarkParse from "remark-parse";
 import remarkRehype from "remark-rehype";
 import { unified } from "unified";
 import {
-  tools,
+  analyzeStartupCostTool,
   analyzeStartupCosts,
   type AnalyzeStartupCostsArgs,
 } from "./mcp.ts";
@@ -120,8 +120,10 @@ export async function chat(
   user: User,
   writeStream: NodeJS.WritableStream
 ) {
-  const stream = new PassThrough();
   let [thinking, content] = ["", ""];
+
+  const stream = new PassThrough();
+  stream.pipe(writeStream);
 
   const entry = await getEntry(sessionId);
   entry.messages.push({
@@ -143,90 +145,74 @@ in order for you to use this tool.
 `,
   };
 
-  const answer = await ollama.chat({
-    stream: true,
-    model: OLLAMA_MODEL,
-    messages: [introMessage, ...entry.messages],
-    tools: tools.slice(0, 1),
-  });
-
-  stream.pipe(writeStream);
-  let isThinking = true;
-
-  const toolCalls = [];
-
-  for await (const part of answer) {
-    if (part.message.tool_calls) {
-      toolCalls.push(...part.message.tool_calls);
-    }
-
-    if (part.message.thinking) {
-      thinking += part.message.thinking;
-      stream.write(part.message.thinking);
-    } else if (part.message.content) {
-      if (isThinking) {
-        isThinking = false;
-      }
-      content += part.message.content;
-      stream.write(part.message.content);
-    }
-  }
-
-  entry.messages.push({
-    role: "assistant",
-    content,
-    thinking,
-    tool_calls: toolCalls,
-  });
-
-  saveEntry(sessionId, entry);
-
-  const toolMessages = toolCalls.map((call) => {
-    if (call.function.name !== "analyze_startup_costs") {
-      throw new Error(
-        `Unsupported tool ${call.function.name}`
-      );
-    }
-
-    const result = analyzeStartupCosts(
-      call.function.arguments as AnalyzeStartupCostsArgs
-    );
-    return {
-      role: "tool",
-      tool_name: call.function.name,
-      content: result,
-    };
-  });
-
-  entry.messages.push(...toolMessages);
-  saveEntry(sessionId, entry);
-
-  if (toolMessages.length) {
-    const newAnswer = await ollama.chat({
+  while (true) {
+    const answer = await ollama.chat({
       stream: true,
-      think: true,
       model: OLLAMA_MODEL,
       messages: [introMessage, ...entry.messages],
-      format: "json",
+      tools: [analyzeStartupCostTool],
     });
 
-    try {
-      for await (const part of answer) {
-        if (part.message.thinking) {
-          thinking += part.message.thinking;
-          stream.write(part.message.thinking);
-        } else if (part.message.content) {
-          content += part.message.content;
-          stream.write(part.message.content);
-        }
-      }
-    } catch (e) {
-      console.error(e);
-      answer.abort();
-    }
-  }
+    let isThinking = true;
 
-  saveEntry(sessionId, entry);
+    const toolCalls = [];
+
+    for await (const part of answer) {
+      if (part.message.thinking) {
+        thinking += part.message.thinking;
+        stream.write(part.message.thinking);
+      }
+      if (part.message.content) {
+        if (isThinking) {
+          isThinking = false;
+          stream.write("\n");
+        }
+        content += part.message.content;
+        stream.write(part.message.content);
+      }
+      if (part.message.tool_calls?.length) {
+        toolCalls.push(...part.message.tool_calls);
+        console.log(part.message.tool_calls);
+      }
+    }
+
+    if (thinking || content || toolCalls.length) {
+      entry.messages.push({
+        role: "assistant",
+        thinking,
+        content,
+        tool_calls: toolCalls,
+      } as any);
+      saveEntry(sessionId, entry);
+    }
+
+    if (!toolCalls.length) {
+      break;
+    }
+    for (const call of toolCalls) {
+      if (
+        call.function.name ===
+        analyzeStartupCostTool.function.name
+      ) {
+        const args = call.function
+          .arguments as AnalyzeStartupCostsArgs;
+        const result = analyzeStartupCosts(args);
+        entry.messages.push({
+          role: "tool",
+          tool_name: call.function.name,
+          content: result,
+        });
+      } else {
+        entry.messages.push({
+          role: "tool",
+          tool_name: call.function.name,
+          content: "Unknown tool",
+        });
+      }
+    }
+
+    saveEntry(sessionId, entry);
+  }
 
   stream.write(content);
   stream.end();

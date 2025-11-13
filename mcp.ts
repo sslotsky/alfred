@@ -370,35 +370,37 @@ const server = new Server(
   }
 );
 
-export const tools: Tool[] = [
-  {
+export const analyzeStartupCostTool: Tool = {
+  type: "function",
+  function: {
+    name: "analyze_startup_costs",
+    description: "Analyzes startup costs for a business.",
     type: "function",
-    function: {
-      name: "analyze_startup_costs",
-      description: "Analyzes startup costs for a business.",
-      type: "function",
-      parameters: {
-        type: "object",
-        properties: {
-          businessType: {
-            type: "string",
-            description:
-              "Type of business (e.g., retail, tech, service).",
-          },
-          location: {
-            type: "string",
-            description: "Location of the business.",
-          },
-          targetMarket: {
-            type: "string",
-            description:
-              "Description of the target customer base.",
-          },
+    parameters: {
+      type: "object",
+      properties: {
+        businessType: {
+          type: "string",
+          description:
+            "Type of business (e.g., retail, tech, service).",
         },
-        required: ["businessType", "location"],
+        location: {
+          type: "string",
+          description: "Location of the business.",
+        },
+        targetMarket: {
+          type: "string",
+          description:
+            "Description of the target customer base.",
+        },
       },
+      required: ["businessType", "location"],
     },
   },
+};
+
+export const tools: Tool[] = [
+  analyzeStartupCostTool,
   {
     type: "function",
     function: {
