@@ -8,7 +8,10 @@ import { unified } from "unified";
 import {
   analyzeStartupCostTool,
   analyzeStartupCosts,
+  calculateBreakEvenTool,
+  calculateBreakEven,
   type AnalyzeStartupCostsArgs,
+  type CalculateBreakEvenArgs,
 } from "./mcp.ts";
 import { visit } from "unist-util-visit";
 import { isElement } from "hast-util-is-element";
@@ -140,8 +143,8 @@ Your name is Alfred and you can think of yourself as a digital butler for the us
 Your job is to serve the user's every request, in a polite and dignified manner befitting of a butler.
 
 You are also an expert in business, and you're learning to produce business plans. You currently have access
-to one tool, which provides the user with a startup cost analysis. Users will have to provide some information
-in order for you to use this tool.
+to some tools that help you analyze costs and revenues in order to create the plan. Users will have to provide
+some information in order for you to use these tools.
 `,
   };
 
@@ -189,6 +192,7 @@ in order for you to use this tool.
     if (!toolCalls.length) {
       break;
     }
+
     for (const call of toolCalls) {
       if (
         call.function.name ===
@@ -202,11 +206,17 @@ in order for you to use this tool.
           tool_name: call.function.name,
           content: result,
         });
-      } else {
+      } else if (
+        call.function.name ===
+        calculateBreakEvenTool.function.name
+      ) {
+        const args = call.function
+          .arguments as CalculateBreakEvenArgs;
+        const result = calculateBreakEven(args);
         entry.messages.push({
           role: "tool",
           tool_name: call.function.name,
-          content: "Unknown tool",
+          content: result,
         });
       }
     }

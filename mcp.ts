@@ -41,7 +41,7 @@ export type AnalyzeStartupCostsArgs = {
   additional_details?: string;
 };
 
-type CalculateBreakEvenArgs = {
+export type CalculateBreakEvenArgs = {
   monthly_fixed_costs: number;
   variable_cost_per_unit: number;
   price_per_unit: number;
@@ -105,7 +105,7 @@ Give specific dollar ranges for each category based on the business type and sca
   return prompt;
 }
 
-async function calculateBreakEven(
+export function calculateBreakEven(
   args: CalculateBreakEvenArgs
 ) {
   const {
@@ -161,11 +161,11 @@ Provide:
 1. Analysis of whether these numbers are realistic and sustainable
 2. Recommendations for improving profitability
 3. Risk assessment and mitigation strategies
-4. Pricing strategy considerations`;
+4. Pricing strategy considerations
 
-  const analysis = await callOllama(prompt);
+The next section should be displayed to the user above the analysis:
 
-  return `BREAK-EVEN ANALYSIS RESULTS:
+BREAK-EVEN ANALYSIS RESULTS:
 
 📊 Key Metrics:
 - Break-even Point: ${break_even_units} units/month
@@ -180,11 +180,12 @@ ${
 }
 
 ---
+`;
 
-${analysis}`;
+  return prompt;
 }
 
-async function generateBusinessPlan(
+export function generateBusinessPlan(
   args: GenerateBusinessPlanArgs
 ) {
   const {
@@ -284,7 +285,7 @@ Create a complete business plan with these sections:
 
 Make this professional, realistic, and compelling. Use specific numbers where provided. Show clear path to profitability and loan repayment.`;
 
-  return await callOllama(prompt);
+  return prompt;
 }
 
 async function competitiveAnalysis(
@@ -399,41 +400,41 @@ export const analyzeStartupCostTool: Tool = {
   },
 };
 
-export const tools: Tool[] = [
-  analyzeStartupCostTool,
-  {
+export const calculateBreakEvenTool: Tool = {
+  type: "function",
+  function: {
+    name: "calculate_break_even",
+    description:
+      "Calculates the break-even point for a business.",
     type: "function",
-    function: {
-      name: "calculate_break_even",
-      description:
-        "Calculates the break-even point for a business.",
-      type: "function",
-      parameters: {
-        type: "object",
-        properties: {
-          fixedCosts: {
-            type: "number",
-            description: "Monthly fixed costs in dollars.",
-          },
-          variableCostPerUnit: {
-            type: "number",
-            description:
-              "Variable cost per unit in dollars.",
-          },
-          sellingPricePerUnit: {
-            type: "number",
-            description:
-              "Selling price per unit in dollars.",
-          },
+    parameters: {
+      type: "object",
+      properties: {
+        fixedCosts: {
+          type: "number",
+          description: "Monthly fixed costs in dollars.",
         },
-        required: [
-          "fixedCosts",
-          "variableCostPerUnit",
-          "sellingPricePerUnit",
-        ],
+        variableCostPerUnit: {
+          type: "number",
+          description: "Variable cost per unit in dollars.",
+        },
+        sellingPricePerUnit: {
+          type: "number",
+          description: "Selling price per unit in dollars.",
+        },
       },
+      required: [
+        "fixedCosts",
+        "variableCostPerUnit",
+        "sellingPricePerUnit",
+      ],
     },
   },
+};
+
+export const tools: Tool[] = [
+  analyzeStartupCostTool,
+  calculateBreakEvenTool,
   {
     type: "function",
     function: {
