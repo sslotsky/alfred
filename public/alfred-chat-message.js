@@ -31,6 +31,10 @@ function getMarkdown(content) {
     .use(highlight)
     .use(() => (tree) => {
       visit(tree, ["element"], (node) => {
+        if (isElement(node, "a")) {
+          node.properties["target"] = "_blank";
+        }
+
         if (!isElement(node, "pre")) {
           return;
         }

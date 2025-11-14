@@ -79,6 +79,10 @@ async function getMarkdown(content: string) {
     // @ts-ignore
     .use(() => (tree: Root) => {
       visit(tree, ["element"], (node) => {
+        if (isElement(node, "a")) {
+          node.properties["target"] = "_blank";
+        }
+
         if (!isElement(node, "pre")) {
           return;
         }
@@ -175,7 +179,7 @@ some information in order for you to use these tools.
       if (part.message.content) {
         if (isThinking) {
           isThinking = false;
-          stream.write("\n");
+          stream.write("\n\n");
         }
         content += part.message.content;
         stream.write(part.message.content);
