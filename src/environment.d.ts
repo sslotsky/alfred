@@ -9,6 +9,10 @@ declare global {
       NODE_ENV: "development" | "production";
     }
   }
+
+  interface DocumentEventMap {
+    "alfred-prompt-submitted": CustomEvent;
+  }
 }
 
 declare module "express-session" {

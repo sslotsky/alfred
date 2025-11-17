@@ -5,8 +5,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node --experimental-strip-types src/server.ts",
+    "start": "rollup -c && node --experimental-strip-types src/server.ts",
+    "start-dev": "concurrently 'pnpm watch-client' 'pnpm watch-server'",
+    "watch-server": "node --experimental-strip-types --watch src/server.ts", 
     "start:redis": "docker run -p 6379:6379 -d redis:8.0-rc1",
+    "watch-client": "rollup -c -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -26,6 +29,7 @@
     "hast-util-to-text": "^4.0.2",
     "hastscript": "^9.0.1",
     "highlight.js": "^11.11.1",
+    "lit": "^3.3.1",
     "lit-element": "^4.2.1",
     "lit-html": "^3.3.1",
     "multiparty": "^4.2.3",
@@ -44,11 +48,23 @@
   },
   "devDependencies": {
     "@flydotio/dockerfile": "^0.7.10",
+    "@rollup/plugin-commonjs": "^29.0.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
     "@types/body-parser": "^1.19.6",
     "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
     "@types/hast": "^3.0.4",
     "@types/multiparty": "^4.2.1",
-    "@types/node": "^24.9.2"
+    "@types/node": "^24.9.2",
+    "@web/rollup-plugin-copy": "^0.5.1",
+    "concurrently": "^9.2.1",
+    "rollup": "^4.53.2",
+    "rollup-plugin-minify-html-literals": "^1.2.6",
+    "rollup-plugin-summary": "^3.0.1",
+    "ts-lit-plugin": "^2.0.2",
+    "tslib": "^2.8.1",
+    "typescript": "^5.9.3"
   }
 }

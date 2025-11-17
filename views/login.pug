@@ -54,24 +54,7 @@ html
     
     link(href="/styles.css" rel="stylesheet")
 
-    script(type="module").
-        import { AlfredLoginForm } from '/alfred-login-form.js';
-
-        customElements.define('alfred-login-form', AlfredLoginForm);
-
-    script(type="importmap").
-      {
-        "imports": {
-          "lit": "https://cdn.jsdelivr.net/npm/lit@3/+esm",
-          "lit/": "https://cdn.jsdelivr.net/npm/lit@3/",
-          "lit-html": "https://cdn.jsdelivr.net/npm/lit-html@3/+esm",
-          "lit-html/": "https://cdn.jsdelivr.net/npm/lit-html@3/",
-          "lit-element": "https://cdn.jsdelivr.net/npm/lit-element@4/+esm",
-          "lit-element/": "https://cdn.jsdelivr.net/npm/lit-element@4/",
-          "@lit/reactive-element": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/+esm",
-          "@lit/reactive-element/": "https://cdn.jsdelivr.net/npm/@lit/reactive-element@2/"
-        }
-      }
+    script(type="module" src="/index.js")
 
     body
       div.container

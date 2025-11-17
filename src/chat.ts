@@ -21,6 +21,7 @@ import { isElement } from "hast-util-is-element";
 import { toText } from "hast-util-to-text";
 import { type User } from "stytch";
 import { redisClient } from "./redis.ts";
+import { processor } from "./shared/rehype.ts";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
@@ -71,41 +72,7 @@ export async function getMessages(
 }
 
 async function getMarkdown(content: string) {
-  const file = await unified()
-    .use(remarkParse)
-    .use(remarkRehype)
-    .use(highlight)
-    .use(rehypeStringify)
-    // @ts-ignore
-    .use(() => (tree: Root) => {
-      visit(tree, ["element"], (node) => {
-        if (isElement(node, "a")) {
-          node.properties["target"] = "_blank";
-        }
-
-        if (!isElement(node, "pre")) {
-          return;
-        }
-
-        const code = node.children[0];
-        if (!isElement(code, "code")) {
-          return;
-        }
-
-        node.children.push({
-          tagName: "alfred-copy-code",
-          properties: {
-            rawText: toText(code, {
-              // @ts-ignore
-              whitespace: "preserve",
-            }),
-          },
-          type: "element",
-          children: [],
-        });
-      });
-    })
-    .process(content);
+  const file = await processor.process(content);
 
   return String(file);
 }
