@@ -1,10 +1,5 @@
 import { type Message, Ollama } from "ollama";
 import { PassThrough } from "stream";
-import highlight from "rehype-highlight";
-import rehypeStringify from "rehype-stringify";
-import remarkParse from "remark-parse";
-import remarkRehype from "remark-rehype";
-import { unified } from "unified";
 import {
   analyzeStartupCostTool,
   analyzeStartupCosts,
@@ -12,13 +7,17 @@ import {
   calculateBreakEven,
   competitiveAnalysisTool,
   competitiveAnalysis,
+  fundingStrategyTool,
+  fundingStrategy,
+  generateBusinessPlanTool,
+  generateBusinessPlan,
   type AnalyzeStartupCostsArgs,
   type CalculateBreakEvenArgs,
   type CompetitiveAnalysisArgs,
+  type GenerateBusinessPlanArgs,
+  type FundingStrategyArgs,
+  TOOLS,
 } from "./mcp.ts";
-import { visit } from "unist-util-visit";
-import { isElement } from "hast-util-is-element";
-import { toText } from "hast-util-to-text";
 import { type User } from "stytch";
 import { redisClient } from "./redis.ts";
 import { processor } from "./shared/rehype.ts";
@@ -127,11 +126,7 @@ some information in order for you to use these tools.
       stream: true,
       model: OLLAMA_MODEL,
       messages: [introMessage, ...entry.messages],
-      tools: [
-        analyzeStartupCostTool,
-        calculateBreakEvenTool,
-        competitiveAnalysisTool,
-      ],
+      tools: TOOLS,
     });
 
     let isThinking = true;
@@ -197,11 +192,36 @@ some information in order for you to use these tools.
           content: result,
         });
       } else if (
-        call.function.name === competitiveAnalysis.name
+        call.function.name ===
+        competitiveAnalysisTool.function.name
       ) {
         const args = call.function
           .arguments as CompetitiveAnalysisArgs;
         const result = competitiveAnalysis(args);
+        entry.messages.push({
+          role: "tool",
+          tool_name: call.function.name,
+          content: result,
+        });
+      } else if (
+        call.function.name ===
+        fundingStrategyTool.function.name
+      ) {
+        const args = call.function
+          .arguments as FundingStrategyArgs;
+        const result = fundingStrategy(args);
+        entry.messages.push({
+          role: "tool",
+          tool_name: call.function.name,
+          content: result,
+        });
+      } else if (
+        call.function.name ===
+        generateBusinessPlanTool.function.name
+      ) {
+        const args = call.function
+          .arguments as GenerateBusinessPlanArgs;
+        const result = generateBusinessPlan(args);
         entry.messages.push({
           role: "tool",
           tool_name: call.function.name,

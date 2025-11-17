@@ -1,15 +1,7 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import {
-  Ollama,
-  type GenerateResponse,
-  type AbortableAsyncIterator,
-  type Tool,
-} from "ollama";
-import {
-  CallToolRequestSchema,
-  ListToolsRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { Ollama, type Tool } from "ollama";
+import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 // ollama.
 
@@ -49,7 +41,7 @@ export type CalculateBreakEvenArgs = {
   startup_costs: number;
 };
 
-type GenerateBusinessPlanArgs = {
+export type GenerateBusinessPlanArgs = {
   business_name: string;
   business_type: string;
   business_description: string;
@@ -70,7 +62,7 @@ export type CompetitiveAnalysisArgs = {
   unique_value_proposition?: string;
 };
 
-type FundingStrategyArgs = {
+export type FundingStrategyArgs = {
   funding_needed: number;
   business_stage: "idea" | "startup" | "early_growth";
   credit_situation?: string;
@@ -321,7 +313,7 @@ Be specific and actionable.`;
   return prompt;
 }
 
-async function fundingStrategy(args: FundingStrategyArgs) {
+export function fundingStrategy(args: FundingStrategyArgs) {
   const {
     funding_needed,
     business_stage,
@@ -356,7 +348,7 @@ Provide detailed advice on:
 
 Be practical, honest, and provide actionable next steps.`;
 
-  return await callOllama(prompt);
+  return prompt;
 }
 
 const server = new Server(
@@ -463,102 +455,103 @@ export const competitiveAnalysisTool: Tool = {
   },
 };
 
-export const tools: Tool[] = [
+export const generateBusinessPlanTool: Tool = {
+  type: "function",
+  function: {
+    name: "generate_business_plan",
+    description: "Generates a comprehensive business plan.",
+    type: "function",
+    parameters: {
+      type: "object",
+      properties: {
+        businessName: {
+          type: "string",
+          description: "Name of the business.",
+        },
+        industry: {
+          type: "string",
+          description:
+            "Industry or market the business operates in.",
+        },
+        totalInitialInvestment: {
+          type: "number",
+          description: "Total initial investment required.",
+        },
+        breakEvenTimeline: {
+          type: "string",
+          description:
+            "Estimated time to reach break-even point.",
+        },
+        ownerBackground: {
+          type: "string",
+          description:
+            "Background and experience of the business owner.",
+        },
+      },
+      required: [
+        "businessName",
+        "industry",
+        "totalInitialInvestment",
+        "breakEvenTimeline",
+      ],
+    },
+  },
+};
+
+export const fundingStrategyTool: Tool = {
+  type: "function",
+  function: {
+    name: "funding_strategy",
+    description:
+      "Develops a funding strategy for the business, including sources and timelines.",
+    type: "function",
+    parameters: {
+      type: "object",
+      properties: {
+        businessStage: {
+          type: "string",
+          enum: [
+            "idea",
+            "prototype",
+            "launch",
+            "growth",
+            "scaling",
+          ],
+          description: "Current stage of the business.",
+        },
+        fundingNeeds: {
+          type: "number",
+          description: "Total amount of funding required.",
+        },
+        fundingSources: {
+          type: "array",
+          items: {
+            type: "string",
+            description:
+              "List of potential funding sources (e.g., investors, loans, grants).",
+          },
+        },
+        timeline: {
+          type: "string",
+          description:
+            "Estimated timeline for securing funding.",
+        },
+      },
+      required: [
+        "businessStage",
+        "fundingNeeds",
+        "fundingSources",
+      ],
+    },
+  },
+};
+
+export const TOOLS: Tool[] = [
   analyzeStartupCostTool,
   calculateBreakEvenTool,
   competitiveAnalysisTool,
-  {
-    type: "function",
-    function: {
-      name: "generate_business_plan",
-      description:
-        "Generates a comprehensive business plan.",
-      type: "function",
-      parameters: {
-        type: "object",
-        properties: {
-          businessName: {
-            type: "string",
-            description: "Name of the business.",
-          },
-          industry: {
-            type: "string",
-            description:
-              "Industry or market the business operates in.",
-          },
-          totalInitialInvestment: {
-            type: "number",
-            description:
-              "Total initial investment required.",
-          },
-          breakEvenTimeline: {
-            type: "string",
-            description:
-              "Estimated time to reach break-even point.",
-          },
-          ownerBackground: {
-            type: "string",
-            description:
-              "Background and experience of the business owner.",
-          },
-        },
-        required: [
-          "businessName",
-          "industry",
-          "totalInitialInvestment",
-          "breakEvenTimeline",
-        ],
-      },
-    },
-  },
-  {
-    type: "function",
-    function: {
-      name: "funding_strategy",
-      description:
-        "Develops a funding strategy for the business, including sources and timelines.",
-      type: "function",
-      parameters: {
-        type: "object",
-        properties: {
-          businessStage: {
-            type: "string",
-            enum: [
-              "idea",
-              "prototype",
-              "launch",
-              "growth",
-              "scaling",
-            ],
-            description: "Current stage of the business.",
-          },
-          fundingNeeds: {
-            type: "number",
-            description:
-              "Total amount of funding required.",
-          },
-          fundingSources: {
-            type: "array",
-            items: {
-              type: "string",
-              description:
-                "List of potential funding sources (e.g., investors, loans, grants).",
-            },
-          },
-          timeline: {
-            type: "string",
-            description:
-              "Estimated timeline for securing funding.",
-          },
-        },
-        required: [
-          "businessStage",
-          "fundingNeeds",
-          "fundingSources",
-        ],
-      },
-    },
-  },
+  fundingStrategyTool,
+  generateBusinessPlanTool,
 ];
 
 // Tool definitions
@@ -566,7 +559,7 @@ server.setRequestHandler(
   ListToolsRequestSchema,
   async () => {
     return {
-      tools,
+      tools: TOOLS,
     };
   }
 );
