@@ -28,6 +28,7 @@ RUN apt-get update -qq && \
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 RUN npm i -g rollup
+RUN npx puppeteer browsers install chrome
 
 # Copy application code
 COPY . .
