@@ -1,0 +1,15 @@
+
+html
+  head
+    title Alfred
+
+    link(href="/styles.css" rel="stylesheet")
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" rel="stylesheet" crossorigin="anonymous")
+
+  body
+    each message in messages
+      - var roleIsUser = message.role === "user"
+      div(class=`message ${message.role}`)
+        span(class="role")= roleIsUser ? "🧑🏽‍💻" : ""
+        span(class="message-content")
+          | !{message.content ? message.content : message.thinking}

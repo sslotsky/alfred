@@ -1,6 +1,7 @@
 import express, { type Handler } from "express";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
+import puppeteer, { type CookieData } from "puppeteer";
 import { chat, getMessages } from "./chat.ts";
 import bodyParser from "body-parser";
 import multiparty from "multiparty";
@@ -8,6 +9,11 @@ import stytch from "stytch";
 import { type Request } from "express";
 import "dotenv/config";
 import { redisClient } from "./redis.ts";
+import cookieParser from "cookie-parser";
+
+process.on("SIGTERM", () => {
+  process.exit(0);
+});
 
 const app = express();
 const port = 3000;
@@ -21,6 +27,7 @@ redisClient.connect().catch((e) => {
 app.set("view engine", "pug");
 app.use(express.static("public"));
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -52,6 +59,69 @@ const authMiddleware: Handler = async (req, res, next) => {
 const stytchClient = new stytch.Client({
   project_id: process.env.STYTCH_PROJECT_ID,
   secret: process.env.STYTCH_SECRET,
+});
+
+app.get("/history", authMiddleware, async (req, res) => {
+  const messages = (
+    await getMessages(req.session.id)
+  ).filter((m) => ["user", "assistant"].includes(m.role));
+
+  const limit = req.query["limit"];
+
+  if (typeof limit === "string") {
+    const numericLimit = parseInt(limit, 10);
+    if (!isNaN(numericLimit)) {
+      messages.splice(0, messages.length - numericLimit);
+    }
+  }
+
+  res.render("history", {
+    messages,
+  });
+});
+
+app.get("/print", authMiddleware, async (req, res) => {
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+    });
+    const page = await browser.newPage();
+
+    const cookies: CookieData[] = Object.entries(
+      req.cookies
+    ).map(([k, v]) => ({
+      name: k,
+      value: v as string,
+      domain: req.hostname,
+    }));
+
+    await page.browserContext().setCookie(...cookies);
+
+    const query = new URL(
+      `${req.protocol}://${req.host}${req.originalUrl}`
+    ).searchParams;
+
+    await page.goto(
+      `${req.protocol}://${
+        req.host
+      }/history?${query.toString()}`,
+      {}
+    );
+
+    const stream = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="chat.pdf"`
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(stream);
+  } catch {
+    res.sendStatus(500);
+  }
 });
 
 app.post("/login", (req, res) => {

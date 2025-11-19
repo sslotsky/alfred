@@ -7,7 +7,7 @@
   "scripts": {
     "start": "rollup -c && node --experimental-strip-types src/server.ts",
     "start-dev": "concurrently 'pnpm watch-client' 'pnpm watch-server'",
-    "watch-server": "node --experimental-strip-types --watch src/server.ts", 
+    "watch-server": "node --experimental-strip-types --watch src/server.ts",
     "start:redis": "docker run -p 6379:6379 -d redis:8.0-rc1",
     "watch-client": "rollup -c -w",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -22,6 +22,7 @@
     "@types/mdast": "^4.0.4",
     "body-parser": "^2.2.0",
     "connect-redis": "^9.0.0",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
@@ -35,6 +36,7 @@
     "multiparty": "^4.2.3",
     "ollama": "^0.6.0",
     "pug": "^3.0.3",
+    "puppeteer": "^24.30.0",
     "redis": "^5.9.0",
     "rehype-highlight": "^7.0.2",
     "rehype-stringify": "^10.0.1",
@@ -53,6 +55,7 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/body-parser": "^1.19.6",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^5.0.5",
     "@types/express-session": "^1.18.2",
     "@types/hast": "^3.0.4",
