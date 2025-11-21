@@ -6,9 +6,13 @@ import bodyParser from "body-parser";
 import multiparty from "multiparty";
 import stytch from "stytch";
 import { type Request } from "express";
-import "dotenv/config";
+import { config } from "dotenv";
 import { redisClient } from "./redis.ts";
 import cookieParser from "cookie-parser";
+
+const env = process.env.NODE_ENV ?? "development";
+
+config({ path: `.env.${env}` });
 
 process.on("SIGTERM", () => {
   process.exit(0);
@@ -18,10 +22,12 @@ const app = express();
 const port = 3000;
 const sessionLife = 1000 * 60 * 60 * 6; // 6 hours
 
-redisClient.connect().catch((e) => {
-  console.error(e);
-  process.exit(1);
-});
+redisClient()
+  .connect()
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 
 app.set("view engine", "pug");
 app.use(express.static("public"));
@@ -31,7 +37,7 @@ app.use(
   session({
     secret: process.env.SESSION_SECRET,
     store: new RedisStore({
-      client: redisClient,
+      client: redisClient(),
       prefix: "alfred",
     }),
     resave: true,

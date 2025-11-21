@@ -36,7 +36,7 @@ const ollama = new Ollama({
 });
 
 async function getEntry(sessionId: string): Promise<Entry> {
-  const entry = await redisClient.get(
+  const entry = await redisClient().get(
     `${sessionId}-messages`
   );
 
@@ -54,7 +54,7 @@ async function getEntry(sessionId: string): Promise<Entry> {
 }
 
 function saveEntry(sessionId: string, e: Entry) {
-  redisClient.set(
+  redisClient().set(
     `${sessionId}-messages`,
     JSON.stringify(e)
   );
@@ -63,7 +63,7 @@ function saveEntry(sessionId: string, e: Entry) {
 export async function getMessages(
   sessionId: string
 ): Promise<Message[]> {
-  const json = await redisClient.get(
+  const json = await redisClient().get(
     `${sessionId}-messages`
   );
   const entry = JSON.parse(json ?? "{}") as Entry;
@@ -148,7 +148,6 @@ some information in order for you to use these tools.
       }
       if (part.message.tool_calls?.length) {
         toolCalls.push(...part.message.tool_calls);
-        console.log(part.message.tool_calls);
       }
     }
 

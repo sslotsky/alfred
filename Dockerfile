@@ -9,8 +9,9 @@ LABEL fly_launch_runtime="Node.js"
 # Node.js app lives here
 WORKDIR /app
 
-# Set production environment
-ENV NODE_ENV="production"
+ARG NODE_ENV=production
+RUN echo "running env ${NODE_ENV}"
+ENV NODE_ENV=$NODE_ENV
 
 # Install pnpm
 ARG PNPM_VERSION=10.19.0
@@ -26,7 +27,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN NODE_ENV=production pnpm install --frozen-lockfile
 RUN npm i -g rollup
 
 # Copy application code
