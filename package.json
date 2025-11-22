@@ -39,6 +39,7 @@
     "multiparty": "^4.2.3",
     "ollama": "^0.6.0",
     "pug": "^3.0.3",
+    "puppeteer": "^24.31.0",
     "redis": "^5.9.0",
     "rehype-highlight": "^7.0.2",
     "rehype-stringify": "^10.0.1",

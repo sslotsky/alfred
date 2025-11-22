@@ -9,6 +9,7 @@ import { type Request } from "express";
 import { config } from "dotenv";
 import { redisClient } from "./redis.ts";
 import cookieParser from "cookie-parser";
+import puppeteer, { type CookieData } from "puppeteer";
 
 const env = process.env.NODE_ENV ?? "development";
 
@@ -85,49 +86,50 @@ app.get("/history", authMiddleware, async (req, res) => {
   });
 });
 
-// app.get("/print", authMiddleware, async (req, res) => {
-//   try {
-//     const browser = await puppeteer.launch({
-//       headless: true,
-//     });
-//     const page = await browser.newPage();
+app.get("/print", authMiddleware, async (req, res) => {
+  try {
+    const browser = await puppeteer.launch({
+      headless: true,
+    });
+    const page = await browser.newPage();
 
-//     const cookies: CookieData[] = Object.entries(
-//       req.cookies
-//     ).map(([k, v]) => ({
-//       name: k,
-//       value: v as string,
-//       domain: req.hostname,
-//     }));
+    const cookies: CookieData[] = Object.entries(
+      req.cookies
+    ).map(([k, v]) => ({
+      name: k,
+      value: v as string,
+      domain: req.hostname,
+    }));
 
-//     await page.browserContext().setCookie(...cookies);
+    await page.browserContext().setCookie(...cookies);
 
-//     const query = new URL(
-//       `${req.protocol}://${req.host}${req.originalUrl}`
-//     ).searchParams;
+    const query = new URL(
+      `${req.protocol}://${req.host}${req.originalUrl}`
+    ).searchParams;
 
-//     await page.goto(
-//       `${req.protocol}://${
-//         req.host
-//       }/history?${query.toString()}`,
-//       {}
-//     );
+    await page.goto(
+      `${req.protocol}://${
+        req.host
+      }/history?${query.toString()}`,
+      {}
+    );
 
-//     const stream = await page.pdf({
-//       format: "A4",
-//       printBackground: true,
-//     });
+    const stream = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
 
-//     res.setHeader(
-//       "Content-Disposition",
-//       `attachment; filename="chat.pdf"`
-//     );
-//     res.setHeader("Content-Type", "application/pdf");
-//     res.send(stream);
-//   } catch {
-//     res.sendStatus(500);
-//   }
-// });
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="chat.pdf"`
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(stream);
+  } catch (e) {
+    console.error(e);
+    res.sendStatus(500);
+  }
+});
 
 app.post("/login", (req, res) => {
   var form = new multiparty.Form();
