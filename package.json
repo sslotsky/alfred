@@ -8,7 +8,7 @@
     "start": "rollup -c && node --experimental-strip-types src/server.ts",
     "start-dev": "concurrently 'pnpm watch-client' 'pnpm watch-server'",
     "build-prod-image": "docker build -t alfred-image .",
-    "build-dev-image": "docker build --build-arg NODE_ENV=docker-local -t alfred-image .",
+    "build-dev-image": "docker build --build-arg DOCKER_LOCAL=true -t alfred-image .",
     "run-dev-image": "docker run -it -p 3000:3000 alfred-image",
     "watch-server": "node --experimental-strip-types --watch src/server.ts",
     "start:redis": "docker run -p 6379:6379 -d redis:8.0-rc1",

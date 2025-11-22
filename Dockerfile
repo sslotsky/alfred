@@ -10,8 +10,9 @@ LABEL fly_launch_runtime="Node.js"
 WORKDIR /app
 
 ARG NODE_ENV=production
-RUN echo "running env ${NODE_ENV}"
+ARG DOCKER_LOCAL
 ENV NODE_ENV=$NODE_ENV
+ENV DOCKER_LOCAL=$DOCKER_LOCAL
 
 # Install pnpm
 ARG PNPM_VERSION=10.19.0
@@ -37,9 +38,14 @@ COPY . .
 # Final stage for app image
 FROM base
 
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y chromium chromium-sandbox && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
 # Copy built application
 COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 3000
+ENV PUPPETEER_EXECUTABLE_PATH="/usr/bin/chromium"
 CMD [ "pnpm", "run", "start" ]

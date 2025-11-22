@@ -13,7 +13,11 @@ import puppeteer, { type CookieData } from "puppeteer";
 
 const env = process.env.NODE_ENV ?? "development";
 
-config({ path: `.env.${env}` });
+const envPath = process.env.DOCKER_LOCAL
+  ? "docker-local"
+  : env;
+
+config({ path: `.env.${envPath}` });
 
 process.on("SIGTERM", () => {
   process.exit(0);
@@ -89,7 +93,9 @@ app.get("/history", authMiddleware, async (req, res) => {
 app.get("/print", authMiddleware, async (req, res) => {
   try {
     const browser = await puppeteer.launch({
+      args: ["--no-sandbox"],
       headless: true,
+      executablePath: "/usr/bin/chromium",
     });
     const page = await browser.newPage();
 
