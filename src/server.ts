@@ -95,42 +95,42 @@ app.get("/print", authMiddleware, async (req, res) => {
     const browser = await puppeteer.launch({
       args: ["--no-sandbox"],
       headless: true,
-      executablePath: "/usr/bin/chromium",
+      executablePath:
+        process.env.DOCKER_LOCAL && "/usr/bin/chromium",
     });
     const page = await browser.newPage();
+    const messages = (
+      await getMessages(req.session.id)
+    ).filter((m) => ["user", "assistant"].includes(m.role));
+    app.render(
+      "history",
+      { messages },
+      async (_err, html) => {
+        await page.addStyleTag({
+          path: "public/styles.css",
+        });
 
-    const cookies: CookieData[] = Object.entries(
-      req.cookies
-    ).map(([k, v]) => ({
-      name: k,
-      value: v as string,
-      domain: req.hostname,
-    }));
+        await page.addStyleTag({
+          url: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css",
+        });
 
-    await page.browserContext().setCookie(...cookies);
+        await page.setContent(html, {
+          waitUntil: "networkidle0",
+        });
 
-    const query = new URL(
-      `${req.protocol}://${req.host}${req.originalUrl}`
-    ).searchParams;
+        const stream = await page.pdf({
+          format: "A4",
+          printBackground: true,
+        });
 
-    await page.goto(
-      `${req.protocol}://${
-        req.host
-      }/history?${query.toString()}`,
-      {}
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="chat.pdf"`
+        );
+        res.setHeader("Content-Type", "application/pdf");
+        res.send(stream);
+      }
     );
-
-    const stream = await page.pdf({
-      format: "A4",
-      printBackground: true,
-    });
-
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="chat.pdf"`
-    );
-    res.setHeader("Content-Type", "application/pdf");
-    res.send(stream);
   } catch (e) {
     console.error(e);
     res.sendStatus(500);
