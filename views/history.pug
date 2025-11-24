@@ -10,6 +10,6 @@ html
     each message in messages
       - var roleIsUser = message.role === "user"
       div(class=`message ${message.role}`)
-        span(class="role")= roleIsUser ? "🧑🏽‍💻" : ""
+        span(class="role")= roleIsUser ? user.emails[0].email : ""
         span(class="message-content")
           | !{message.content ? message.content : message.thinking}

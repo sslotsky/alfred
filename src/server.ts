@@ -87,6 +87,7 @@ app.get("/history", authMiddleware, async (req, res) => {
 
   res.render("history", {
     messages,
+    user: req.session.user,
   });
 });
 
@@ -99,38 +100,38 @@ app.get("/print", authMiddleware, async (req, res) => {
         process.env.DOCKER_LOCAL && "/usr/bin/chromium",
     });
     const page = await browser.newPage();
-    const messages = (
-      await getMessages(req.session.id)
-    ).filter((m) => ["user", "assistant"].includes(m.role));
-    app.render(
-      "history",
-      { messages },
-      async (_err, html) => {
-        await page.addStyleTag({
-          path: "public/styles.css",
-        });
+    const cookies: CookieData[] = Object.entries(
+      req.cookies
+    ).map(([k, v]) => ({
+      name: k,
+      value: v as string,
+      domain: req.hostname,
+    }));
 
-        await page.addStyleTag({
-          url: "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css",
-        });
+    await page.browserContext().setCookie(...cookies);
 
-        await page.setContent(html, {
-          waitUntil: "networkidle0",
-        });
+    const query = new URL(
+      `${req.protocol}://${req.host}${req.originalUrl}`
+    ).searchParams;
 
-        const stream = await page.pdf({
-          format: "A4",
-          printBackground: true,
-        });
-
-        res.setHeader(
-          "Content-Disposition",
-          `attachment; filename="chat.pdf"`
-        );
-        res.setHeader("Content-Type", "application/pdf");
-        res.send(stream);
-      }
+    await page.goto(
+      `${req.protocol}://${
+        req.host
+      }/history?${query.toString()}`,
+      {}
     );
+
+    const stream = await page.pdf({
+      format: "A4",
+      printBackground: true,
+    });
+
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="chat.pdf"`
+    );
+    res.setHeader("Content-Type", "application/pdf");
+    res.send(stream);
   } catch (e) {
     console.error(e);
     res.sendStatus(500);
@@ -232,12 +233,17 @@ app.get("/chat", authMiddleware, async (req, res) => {
 });
 
 app.post("/chat", authMiddleware, (req, res) => {
-  chat(
-    req.body.prompt ?? "Tell me something interesting",
-    req.session.id,
-    req.session.user!,
-    res
-  );
+  try {
+    chat(
+      req.body.prompt ?? "Tell me something interesting",
+      req.session.id,
+      req.session.user!,
+      res
+    );
+  } catch (e) {
+    console.error(e);
+    res.send(500);
+  }
 });
 
 app.listen(port, () => {

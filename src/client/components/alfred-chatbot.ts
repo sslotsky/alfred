@@ -106,6 +106,7 @@ export class AlfredChatbot extends LitElement {
       return html`<alfred-chat-message
         role="${m.role}"
         message="${m.content}"
+        username=${this.name}
       ></alfred-chat-message>`;
     });
 

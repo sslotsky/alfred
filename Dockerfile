@@ -26,6 +26,7 @@ FROM base AS build
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
+
 # Install node modules
 COPY package.json pnpm-lock.yaml ./
 RUN NODE_ENV=production pnpm install --frozen-lockfile
@@ -38,9 +39,13 @@ COPY . .
 # Final stage for app image
 FROM base
 
+# Chrome, for puppeteer
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y chromium chromium-sandbox && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
+
+# Fonts, for rendering PDFs in puppeteer
+RUN apt-get update && apt-get install --no-install-recommends -y fonts-noto fonts-noto-color-emoji
 
 # Copy built application
 COPY --from=build /app /app

@@ -1,17 +1,15 @@
-import { copy } from '@web/rollup-plugin-copy';
+import copy from 'rollup-plugin-copy';
 import resolve from '@rollup/plugin-node-resolve';
 // import {terser} from '@rollup/plugin-terser';
 // import minifyHTML from 'rollup-plugin-minify-html-literals';
 import summary from 'rollup-plugin-summary';
 import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
+import path from 'path';
 
 
 export default {
   plugins: [
-    // Entry point for application build; can specify a glob to build multiple
-    // HTML files for non-SPA app
-    // Resolve bare module specifiers to relative paths
     typescript({
       include: ['src/client/**/*.ts', 'src/shared/**/*.ts', 'src/environment.d.ts'],
       target: "ES2022",
@@ -30,10 +28,10 @@ export default {
     commonjs({
       requireReturnsDefault: 'auto'
     }),
+    copy({ targets: [
+      { src: ['**/*.css', '!node_modules', '!public'], dest: 'public'}
+    ] }),
     // Optional: copy any static assets to build directory
-    copy({
-      patterns: ['*.css'],
-    }),
   ],
   input: 'src/client/index.ts',
   output: {

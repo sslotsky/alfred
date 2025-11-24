@@ -88,13 +88,14 @@ export class AlfredChatMessage extends LitElement {
   ];
 
   @property() message: string = "";
+  @property() username: string = "";
   @property() thinking: boolean = false;
   @property() role: string = "";
 
   render() {
     const leftSide =
       this.role === "user"
-        ? "👨🏽‍💻"
+        ? this.username
         : this.thinking
         ? "🧠"
         : nothing;

@@ -1,7 +1,7 @@
 import { LitElement, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
-@customElement("alfred-coopy-code")
+@customElement("alfred-copy-code")
 export class AlfredCopyCode extends LitElement {
   @property()
   rawtext: string = "";

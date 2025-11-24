@@ -76,8 +76,13 @@ body {
 .message {
   display: grid;
   grid-template-columns: 5rem auto;
-  width: 100%;
+  width: 95%;
   padding: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.message pre code {
+  border-radius: 20px;
 }
 
 .message .message-content pre {
@@ -91,6 +96,9 @@ body {
 
 .message.user {
   filter: brightness(1.5);
+  border-radius: 10px;
+  background-color: black;
+  padding: 0.5rem;
 }
 
 .message.user pre {
