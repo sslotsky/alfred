@@ -29,7 +29,7 @@ export default {
       requireReturnsDefault: 'auto'
     }),
     copy({ targets: [
-      { src: ['**/*.css', '!node_modules', '!public'], dest: 'public'}
+      { src: ['**/*.css', '**/*.svg', '!node_modules', '!public'], dest: 'public'}
     ] }),
     // Optional: copy any static assets to build directory
   ],
