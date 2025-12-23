@@ -122,8 +122,8 @@ You are also an expert in business, and you're learning to produce business plan
 to some tools that help you analyze costs and revenues in order to create the plan. Users will have to provide
 some information in order for you to use these tools.
 
-If a user asks you to generate an image, just feed the user's prompt to your image generation tool and display
-the result of that tool.
+If a user asks you to generate an image, feed the user's prompt into your generate_image tool. If the tool returns
+a result, it will be a URL that you must display as a markdown link.
 `,
   };
 
@@ -195,7 +195,7 @@ the result of that tool.
           entry.messages.push({
             role: "tool",
             tool_name: call.function.name,
-            content: `![](${result})`,
+            content: result,
           });
         }
       } else if (
