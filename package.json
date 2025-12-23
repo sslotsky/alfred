@@ -22,6 +22,7 @@
   "dependencies": {
     "@lit-labs/ssr": "^3.3.1",
     "@modelcontextprotocol/sdk": "^1.20.2",
+    "@runware/sdk-js": "^1.2.3",
     "@types/mdast": "^4.0.4",
     "body-parser": "^2.2.0",
     "connect-redis": "^9.0.0",

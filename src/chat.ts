@@ -1,6 +1,7 @@
 import { type Message, Ollama } from "ollama";
 import { PassThrough } from "stream";
 import {
+  imageGenerationTool,
   analyzeStartupCostTool,
   analyzeStartupCosts,
   calculateBreakEvenTool,
@@ -16,11 +17,13 @@ import {
   type CompetitiveAnalysisArgs,
   type GenerateBusinessPlanArgs,
   type FundingStrategyArgs,
+  type GenerateImageArgs,
   TOOLS,
 } from "./mcp.ts";
 import { type User } from "stytch";
 import { redisClient } from "./redis.ts";
 import { processor } from "./shared/rehype.ts";
+import { getImageRef } from "./image-generation.ts";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
@@ -118,6 +121,9 @@ Your job is to serve the user's every request, in a polite and dignified manner 
 You are also an expert in business, and you're learning to produce business plans. You currently have access
 to some tools that help you analyze costs and revenues in order to create the plan. Users will have to provide
 some information in order for you to use these tools.
+
+If a user asks you to generate an image, just feed the user's prompt to your image generation tool and display
+the result of that tool.
 `,
   };
 
@@ -178,6 +184,20 @@ some information in order for you to use these tools.
           tool_name: call.function.name,
           content: result,
         });
+      } else if (
+        call.function.name ===
+        imageGenerationTool.function.name
+      ) {
+        const args = call.function
+          .arguments as GenerateImageArgs;
+        const result = await getImageRef(args.prompt);
+        if (result) {
+          entry.messages.push({
+            role: "tool",
+            tool_name: call.function.name,
+            content: `![](${result})`,
+          });
+        }
       } else if (
         call.function.name ===
         calculateBreakEvenTool.function.name

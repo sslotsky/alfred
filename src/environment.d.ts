@@ -6,6 +6,7 @@ declare global {
       STYTCH_PROJECT_ID: string;
       STYTCH_SECRET: string;
       SESSION_SECRET: string;
+      RUNWARE_API_KEY: string;
       NODE_ENV: "development" | "production";
     }
   }

@@ -1,6 +1,6 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { Ollama, type Tool } from "ollama";
+import { type Tool } from "ollama";
 import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
 
 // ollama.
@@ -10,27 +10,16 @@ const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3";
 
-const ollama = new Ollama({
-  host: OLLAMA_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-async function callOllama(prompt: string) {
-  return ollama.generate({
-    model: OLLAMA_MODEL,
-    prompt,
-    stream: true,
-  });
-}
-
 // Type definitions for tool arguments
 export type AnalyzeStartupCostsArgs = {
   business_type: string;
   location: string;
   scale: "micro" | "small" | "medium";
   additional_details?: string;
+};
+
+export type GenerateImageArgs = {
+  prompt: string;
 };
 
 export type CalculateBreakEvenArgs = {
@@ -498,6 +487,22 @@ export const generateBusinessPlanTool: Tool = {
   },
 };
 
+export const imageGenerationTool: Tool = {
+  type: "function",
+  function: {
+    name: "generate_image",
+    description:
+      "Generates an image URL to be used in responses",
+    type: "function",
+    parameters: {
+      type: "object",
+      properties: {
+        prompt: { type: "string" },
+      },
+    },
+  },
+};
+
 export const fundingStrategyTool: Tool = {
   type: "function",
   function: {
@@ -551,6 +556,7 @@ export const TOOLS: Tool[] = [
   calculateBreakEvenTool,
   competitiveAnalysisTool,
   fundingStrategyTool,
+  imageGenerationTool,
   generateBusinessPlanTool,
 ];
 
