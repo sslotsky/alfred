@@ -25,10 +25,11 @@ html
         alfred-chatbot(name=user.emails[0].email)
           each message in messages
             - var roleIsUser = message.role === "user"
-            div(class=`message ${message.role}`)
-              span(class="role")= roleIsUser ? user.emails[0].email : ""
-              span(class="message-content")
-                | !{message.content ? message.content : message.thinking}
+            unless message.role === "tool"
+              div(class=`message ${message.role}`)
+                span(class="role")= roleIsUser ? user.emails[0].email : ""
+                span(class="message-content")
+                  | !{message.content ? message.content : message.thinking}
       div(class="prompt-container")
         alfred-prompt
           span(class="prompt" contenteditable="true")

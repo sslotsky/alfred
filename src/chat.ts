@@ -122,8 +122,9 @@ You are also an expert in business, and you're learning to produce business plan
 to some tools that help you analyze costs and revenues in order to create the plan. Users will have to provide
 some information in order for you to use these tools.
 
-If a user asks you to generate an image, feed the user's prompt into your generate_image tool. If the tool returns
-a result, it will be a URL that you must display as a markdown link.
+If a user asks you to generate an image, feed the user's prompt into your generate_image tool. Make sure to add
+a new line in your output before displaying the result of this tool. If the output of the tool doesn't contain
+a URL, explain to the user that something went wrong and the image couldn't be generated.
 `,
   };
 
@@ -176,13 +177,13 @@ a result, it will be a URL that you must display as a markdown link.
         call.function.name ===
         analyzeStartupCostTool.function.name
       ) {
-        const args = call.function
-          .arguments as AnalyzeStartupCostsArgs;
-        const result = analyzeStartupCosts(args);
         entry.messages.push({
           role: "tool",
           tool_name: call.function.name,
-          content: result,
+          content: analyzeStartupCosts(
+            call.function
+              .arguments as AnalyzeStartupCostsArgs
+          ),
         });
       } else if (
         call.function.name ===
@@ -195,7 +196,7 @@ a result, it will be a URL that you must display as a markdown link.
           entry.messages.push({
             role: "tool",
             tool_name: call.function.name,
-            content: result,
+            content: `![${args.prompt}](${result})`,
           });
         }
       } else if (

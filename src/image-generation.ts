@@ -7,19 +7,16 @@ export async function getImageRef(
     apiKey: process.env.RUNWARE_API_KEY,
   });
 
-  console.log(process.env.RUNWARE_API_KEY);
-  console.log("generating image");
   try {
     const images = await runware.requestImages({
       positivePrompt: prompt,
-      model: "runware:101@1",
+      model: "bfl:6@1",
       width: 1024,
       height: 1024,
     });
-    console.log("generated images");
     return images?.[0].imageURL;
-  } catch (e) {
+  } catch (e: any) {
     console.error(e);
-    throw e;
+    return e.message;
   }
 }

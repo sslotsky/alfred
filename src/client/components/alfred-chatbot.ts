@@ -54,7 +54,6 @@ export class AlfredChatbot extends LitElement {
           this.incomingMessage += new TextDecoder().decode(
             value
           );
-          // this.requestUpdate();
         }
 
         const next = await stream.read();

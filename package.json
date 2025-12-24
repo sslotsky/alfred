@@ -13,6 +13,7 @@
     "watch-server": "node --experimental-strip-types --watch src/server.ts",
     "start:redis": "docker run -p 6379:6379 -d redis:8.0-rc1",
     "watch-client": "rollup -c -w",
+    "start:ollama": "ollama run qwen3 --keepalive=-1m",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
