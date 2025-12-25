@@ -16,6 +16,12 @@ export const processor = unified()
     visit(tree, ["element"], (node) => {
       if (isElement(node, "a")) {
         node.properties["target"] = "_blank";
+        return;
+      }
+
+      if (isElement(node, "img")) {
+        node.properties.height = 500;
+        return;
       }
 
       if (!isElement(node, "pre")) {

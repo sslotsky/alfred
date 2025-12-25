@@ -188,3 +188,8 @@ alfred-prompt button.send:hover {
   transform: scale(1.05);
   filter: brightness(1.5);
 }
+
+.message-content img {
+  height: 500px;
+  width: auto;
+}
