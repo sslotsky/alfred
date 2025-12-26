@@ -20,3 +20,26 @@ export async function getImageRef(
     return e.message;
   }
 }
+
+export async function transformImage(
+  prompt: string,
+  imageUrl: string
+) {
+  const runware = new Runware({
+    apiKey: process.env.RUNWARE_API_KEY,
+  });
+
+  try {
+    const images = await runware.imageInference({
+      positivePrompt: prompt,
+      seedImage: imageUrl,
+      model: "runware:101@1",
+      width: 1024,
+      height: 1024,
+    });
+    return images?.[0].imageURL;
+  } catch (e: any) {
+    console.error(e);
+    return e.message;
+  }
+}

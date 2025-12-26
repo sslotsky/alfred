@@ -2,7 +2,6 @@ import express, { type Handler } from "express";
 import session from "express-session";
 import { RedisStore } from "connect-redis";
 import { chat, getMessages } from "./chat.ts";
-import bodyParser from "body-parser";
 import multiparty from "multiparty";
 import stytch from "stytch";
 import { type Request } from "express";
@@ -36,7 +35,6 @@ redisClient()
 
 app.set("view engine", "pug");
 app.use(express.static("public"));
-app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(
   session({
@@ -234,12 +232,24 @@ app.get("/chat", authMiddleware, async (req, res) => {
 
 app.post("/chat", authMiddleware, (req, res) => {
   try {
-    chat(
-      req.body.prompt ?? "Tell me something interesting",
-      req.session.id,
-      req.session.user!,
-      res
-    );
+    var form = new multiparty.Form();
+
+    form.parse(req, function (_err, fields, files) {
+      const f = files["file"]?.[0];
+
+      chat(
+        {
+          prompt:
+            fields.prompt?.[0] ??
+            "Tell me something interesting",
+          type: fields.type?.[0],
+          imagePath: f ? f.path : undefined,
+        },
+        req.session.id,
+        req.session.user!,
+        res
+      );
+    });
   } catch (e) {
     console.error(e);
     res.send(500);

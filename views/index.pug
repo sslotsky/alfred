@@ -32,5 +32,9 @@ html
                   | !{message.content ? message.content : message.thinking}
       div(class="prompt-container")
         alfred-prompt
-          span(class="prompt" contenteditable="true")
-          button(class="send") ⇨
+          div(class="prompt" contenteditable="true")
+          div(class="bar")
+            div(class="input-bar")
+              alfred-attach(id="select-image")
+            div(class="action-bar")
+              button(class="send action-button") ⇨

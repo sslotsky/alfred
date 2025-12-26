@@ -1,11 +1,10 @@
-import copy from 'rollup-plugin-copy';
+import copy from 'rollup-plugin-copy-watch';
 import resolve from '@rollup/plugin-node-resolve';
 // import {terser} from '@rollup/plugin-terser';
 // import minifyHTML from 'rollup-plugin-minify-html-literals';
 import summary from 'rollup-plugin-summary';
 import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
-import path from 'path';
 
 
 export default {
@@ -28,9 +27,12 @@ export default {
     commonjs({
       requireReturnsDefault: 'auto'
     }),
-    copy({ targets: [
-      { src: ['**/*.css', '**/*.svg', '!node_modules', '!public'], dest: 'public'}
-    ] }),
+    copy({
+      targets: [
+        { src: ['**/*.css', '**/*.svg', '!node_modules', '!public'], dest: 'public'},
+      ],
+      watch: `src/client/static`
+     }),
     // Optional: copy any static assets to build directory
   ],
   input: 'src/client/index.ts',

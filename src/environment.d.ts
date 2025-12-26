@@ -13,6 +13,7 @@ declare global {
 
   interface DocumentEventMap {
     "alfred-prompt-submitted": CustomEvent;
+    "alfred-image-selected": CustomEvent;
   }
 }
 

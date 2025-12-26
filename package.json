@@ -13,7 +13,7 @@
     "watch-server": "node --experimental-strip-types --watch src/server.ts",
     "start:redis": "docker run -p 6379:6379 -d redis:8.0-rc1",
     "watch-client": "rollup -c -w",
-    "start:ollama": "ollama run qwen3 --keepalive=-1m",
+    "start:ollama": "ollama run qwen3-vl --keepalive=-1m",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -69,6 +69,7 @@
     "concurrently": "^9.2.1",
     "rollup": "^4.53.2",
     "rollup-plugin-copy": "^3.5.0",
+    "rollup-plugin-copy-watch": "^0.0.1",
     "rollup-plugin-minify-html-literals": "^1.2.6",
     "rollup-plugin-summary": "^3.0.1",
     "ts-lit-plugin": "^2.0.2",

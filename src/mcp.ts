@@ -1,14 +1,6 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { type Tool } from "ollama";
 import { ListToolsRequestSchema } from "@modelcontextprotocol/sdk/types.js";
-
-// ollama.
-
-// Ollama API configuration
-const OLLAMA_API_URL =
-  process.env.OLLAMA_API_URL || "http://localhost:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3";
 
 // Type definitions for tool arguments
 export type AnalyzeStartupCostsArgs = {
@@ -16,6 +8,11 @@ export type AnalyzeStartupCostsArgs = {
   location: string;
   scale: "micro" | "small" | "medium";
   additional_details?: string;
+};
+
+export type TransformImageArgs = {
+  prompt: string;
+  imagePath: string;
 };
 
 export type GenerateImageArgs = {
@@ -487,6 +484,23 @@ export const generateBusinessPlanTool: Tool = {
   },
 };
 
+export const imageTransformationTool: Tool = {
+  type: "function",
+  function: {
+    name: "transform_image",
+    description:
+      "Transforms an image to a new image and returns the URL",
+    type: "function",
+    parameters: {
+      type: "object",
+      properties: {
+        prompt: { type: "string" },
+        imagePath: { type: "string" },
+      },
+    },
+  },
+};
+
 export const imageGenerationTool: Tool = {
   type: "function",
   function: {
@@ -557,6 +571,7 @@ export const TOOLS: Tool[] = [
   competitiveAnalysisTool,
   fundingStrategyTool,
   imageGenerationTool,
+  imageTransformationTool,
   generateBusinessPlanTool,
 ];
 
@@ -569,76 +584,3 @@ server.setRequestHandler(
     };
   }
 );
-
-// Tool execution handler
-// server.setRequestHandler(
-//   CallToolRequestSchema,
-//   async (request) => {
-//     const { name, arguments: args } = request.params;
-
-//     try {
-//       let result: AbortableAsyncIterator<GenerateResponse>;
-
-//       switch (name) {
-//         case "analyze_startup_costs":
-//           result = analyzeStartupCosts(
-//             args as AnalyzeStartupCostsArgs
-//           );
-//           break;
-//         case "generate_business_plan":
-//           result = await generateBusinessPlan(
-//             args as GenerateBusinessPlanArgs
-//           );
-//           break;
-
-//         case "competitive_analysis":
-//           result = await competitiveAnalysis(
-//             args as CompetitiveAnalysisArgs
-//           );
-//           break;
-
-//         case "funding_strategy":
-//           result = await fundingStrategy(
-//             args as FundingStrategyArgs
-//           );
-//           break;
-
-//         default:
-//           throw new Error(`Unknown tool: ${name}`);
-//       }
-
-//       return {
-//         content: [
-//           {
-//             type: "text",
-//             text: result,
-//           },
-//         ],
-//       };
-//     } catch (error) {
-//       const errorMessage =
-//         error instanceof Error
-//           ? error.message
-//           : String(error);
-//       return {
-//         content: [
-//           {
-//             type: "text",
-//             text: `Error: ${errorMessage}`,
-//           },
-//         ],
-//         isError: true,
-//       };
-//     }
-//   }
-// );
-
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error(
-    `Business Planning MCP Server running on stdio`
-  );
-  console.error(`Using Ollama at: ${OLLAMA_API_URL}`);
-  console.error(`Model: ${OLLAMA_MODEL}`);
-}

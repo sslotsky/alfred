@@ -1,9 +1,37 @@
-import { LitElement, html } from "lit";
+import { LitElement, css, html } from "lit";
 import { customElement, state } from "lit/decorators.js";
 
 @customElement("alfred-prompt")
 export class AlfredPrompt extends LitElement {
+  static styles = css`
+    .image-container {
+      position: relative;
+      max-width: fit-content;
+    }
+
+    .button-container {
+      position: absolute;
+      top: 5;
+      right: 5;
+    }
+
+    .button-container button {
+      display: none;
+      background-color: #ff4757;
+      border-radius: 25%;
+      border: none;
+      font-size: 0.5rem;
+      cursor: pointer;
+    }
+
+    .image-container:hover button {
+      display: unset;
+    }
+  `;
+
   @state() paused: boolean = false;
+  @state() preview: ProgressEvent<FileReader> | undefined =
+    undefined;
 
   pause = () => {
     this.paused = true;
@@ -32,10 +60,18 @@ export class AlfredPrompt extends LitElement {
 
     const event = new CustomEvent(
       "alfred-prompt-submitted",
-      { detail: { text: child.innerText } }
+      {
+        detail: {
+          text: child.innerText,
+          file: this.preview?.target?.result,
+        },
+        composed: true,
+        bubbles: true,
+      }
     );
     document.dispatchEvent(event);
     child.textContent = "";
+    this.preview = undefined;
   }
 
   connectedCallback() {
@@ -71,6 +107,19 @@ export class AlfredPrompt extends LitElement {
         this.submitPrompt();
       }
     });
+
+    this.addEventListener(
+      "alfred-image-selected",
+      (e: CustomEventInit<{ file: File }>) => {
+        if (e.detail) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            this.preview = e;
+          };
+          reader.readAsDataURL(e.detail.file);
+        }
+      }
+    );
   }
 
   disconnectedCallback() {
@@ -86,7 +135,23 @@ export class AlfredPrompt extends LitElement {
     );
   }
 
+  clearPreview = () => {
+    this.preview = undefined;
+  };
+
   render() {
-    return html`<slot></slot>`;
+    const preview =
+      this.preview?.target &&
+      html`<div class="image-container">
+        <img
+          height="50"
+          src=${this.preview.target.result}
+        />
+        <div class="button-container">
+          <button @click=${this.clearPreview}>x</button>
+        </div>
+      </div>`;
+
+    return html`${preview}<slot></slot>`;
   }
 }

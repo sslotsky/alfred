@@ -20,8 +20,8 @@ export class AlfredChatbot extends LitElement {
     this.requestUpdate();
   }
 
-  handleSubmit = (e: CustomEvent) => {
-    const text = e.detail.text;
+  handleSubmit = async (e: CustomEvent) => {
+    const { text, file } = e.detail;
     this.addMessage({ role: "user", content: text });
 
     const thinking = new CustomEvent(
@@ -30,12 +30,19 @@ export class AlfredChatbot extends LitElement {
     document.dispatchEvent(thinking);
     this.isThinking = true;
 
+    const formData = new FormData();
+    formData.append("prompt", text);
+    formData.append("type", "image-request");
+
+    if (file) {
+      const fileResponse = await fetch(file);
+      const blob = await fileResponse.blob();
+      formData.append("file", blob);
+    }
+
     fetch("/chat", {
       method: "POST",
-      body: JSON.stringify({ prompt: text }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      body: formData,
     }).then(async (res) => {
       if (res.redirected) {
         window.location.assign(res.url);

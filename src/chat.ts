@@ -18,16 +18,22 @@ import {
   type GenerateBusinessPlanArgs,
   type FundingStrategyArgs,
   type GenerateImageArgs,
+  type TransformImageArgs,
   TOOLS,
+  imageTransformationTool,
 } from "./mcp.ts";
 import { type User } from "stytch";
 import { redisClient } from "./redis.ts";
 import { processor } from "./shared/rehype.ts";
-import { getImageRef } from "./image-generation.ts";
+import {
+  getImageRef,
+  transformImage,
+} from "./image-generation.ts";
+import { readFileSync } from "fs";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3-vl";
 
 type Entry = { messages: Message[] };
 
@@ -94,27 +100,35 @@ export async function getMessageHtml(
 }
 
 export async function chat(
-  prompt: string,
+  input: {
+    prompt: string;
+    type?: string;
+    imagePath?: string;
+  },
   sessionId: string,
   user: User,
   writeStream: NodeJS.WritableStream
 ) {
+  const { prompt, imagePath } = input;
+
   let [thinking, content] = ["", ""];
 
   const stream = new PassThrough();
   stream.pipe(writeStream);
 
   const entry = await getEntry(sessionId);
-  entry.messages.push({
+
+  const userMessage: Message = {
     role: "user",
-    content: prompt,
-  });
+    content: prompt.trim(),
+    images: imagePath ? [imagePath] : undefined,
+  };
+
+  entry.messages.push(userMessage);
 
   saveEntry(sessionId, entry);
 
-  const introMessage = {
-    role: "system",
-    content: `
+  let systemPrompt = `
 Your name is Alfred and you can think of yourself as a digital butler for the user, ${user.emails[0].email}.
 Your job is to serve the user's every request, in a polite and dignified manner befitting of a butler.
 
@@ -126,7 +140,18 @@ If a user asks you to generate an image, feed the user's prompt into your genera
 can improve the prompt for a better result, you're free to do so. Always display the image on a new line by itself.
 If the output of the tool doesn't contain a URL, explain to the user that something went wrong and the image couldn't
 be generated. Make sure to tell the user what prompt you actually used in the tool call.
-`,
+
+A user might ask you to modify an image in some way. If so, you can use your transform_image tool using the prompt
+and the provided image, as long as an image is provided in the message object.
+`;
+
+  if (imagePath) {
+    systemPrompt += `The user provided an image URL of ${imagePath}`;
+  }
+
+  const introMessage = {
+    role: "system",
+    content: systemPrompt,
   };
 
   while (true) {
@@ -136,7 +161,6 @@ be generated. Make sure to tell the user what prompt you actually used in the to
       messages: [introMessage, ...entry.messages],
       tools: TOOLS,
     });
-
     let isThinking = true;
 
     const toolCalls = [];
@@ -193,6 +217,27 @@ be generated. Make sure to tell the user what prompt you actually used in the to
         const args = call.function
           .arguments as GenerateImageArgs;
         const result = await getImageRef(args.prompt);
+        if (result) {
+          entry.messages.push({
+            role: "tool",
+            tool_name: call.function.name,
+            content: `![${args.prompt}](${result})`,
+          });
+        }
+      } else if (
+        call.function.name ===
+        imageTransformationTool.function.name
+      ) {
+        const args = call.function
+          .arguments as TransformImageArgs;
+        const image = readFileSync(
+          args.imagePath,
+          "base64"
+        );
+        const result = await transformImage(
+          args.prompt,
+          image
+        );
         if (result) {
           entry.messages.push({
             role: "tool",
