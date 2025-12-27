@@ -33,7 +33,7 @@ import { readFileSync } from "fs";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3-vl";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "gemma3";
 
 type Entry = { messages: Message[] };
 
