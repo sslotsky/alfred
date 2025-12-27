@@ -138,16 +138,17 @@ If a user asks you to generate an image, feed the user's prompt into your genera
 can improve the prompt for a better result, you're free to do so. Always display the image on a new line by itself.
 If the output of the tool doesn't contain a URL, explain to the user that something went wrong and the image couldn't
 be generated. Make sure to tell the user what prompt you actually used in the tool call.
-
-A user might ask you to modify an image in some way. If so, you can use your transform_image tool using the prompt
-and the provided image, as long as an image is provided in the message object.
 `;
 
   if (imagePath) {
-    systemPrompt += `The user provided an image URL of ${imagePath}`;
+    systemPrompt += `
+If the user asks you to modify an image, use the transform_image tool with the user's prompt
+and an image path of ${imagePath}. Make sure to display the image to the user on a new line
+by itself. DON'T USE A DIFFERENT IMAGE PATH THAN ${imagePath} IN YOUR TOOL CALL, THIS IS VERY
+IMPORTANT!`;
   }
 
-  const introMessage = {
+  const introMessage: Message = {
     role: "system",
     content: systemPrompt,
   };
@@ -229,19 +230,29 @@ and the provided image, as long as an image is provided in the message object.
       ) {
         const args = call.function
           .arguments as TransformImageArgs;
-        const image = readFileSync(
-          args.imagePath,
-          "base64"
-        );
-        const result = await transformImage(
-          args.prompt,
-          image
-        );
-        if (result) {
+
+        try {
+          const image = readFileSync(
+            args.imagePath,
+            "base64"
+          );
+          const result = await transformImage(
+            args.prompt,
+            image
+          );
+          if (result) {
+            entry.messages.push({
+              role: "tool",
+              tool_name: call.function.name,
+              content: `![${args.prompt}](${result})`,
+            });
+          }
+        } catch (e) {
+          console.error(e);
           entry.messages.push({
             role: "tool",
             tool_name: call.function.name,
-            content: `![${args.prompt}](${result})`,
+            content: `Tool call failure. Did you supply the right image path?`,
           });
         }
       } else if (
