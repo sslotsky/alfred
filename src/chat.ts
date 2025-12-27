@@ -102,6 +102,7 @@ export async function getMessageHtml(
 export async function chat(
   input: {
     prompt: string;
+    shouldThink?: boolean;
     type?: string;
     imagePath?: string;
   },
@@ -109,7 +110,7 @@ export async function chat(
   user: User,
   writeStream: NodeJS.WritableStream
 ) {
-  const { prompt, imagePath } = input;
+  const { prompt, imagePath, shouldThink = false } = input;
 
   let [thinking, content] = ["", ""];
 
@@ -158,6 +159,7 @@ and the provided image, as long as an image is provided in the message object.
       model: OLLAMA_MODEL,
       messages: [introMessage, ...entry.messages],
       tools: TOOLS,
+      think: shouldThink,
     });
     let isThinking = true;
 

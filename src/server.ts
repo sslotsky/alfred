@@ -229,6 +229,7 @@ app.get("/chat", authMiddleware, async (req, res) => {
   res.render("index", {
     messages: await getMessages(req.session.id),
     user: req.session.user,
+    busted: Math.floor(Math.random() * 100),
   });
 });
 
