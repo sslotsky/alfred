@@ -168,7 +168,9 @@ and the provided image, as long as an image is provided in the message object.
     for await (const part of answer) {
       if (part.message.thinking) {
         thinking += part.message.thinking;
-        stream.write(part.message.thinking);
+        if (shouldThink) {
+          stream.write(part.message.thinking);
+        }
       }
       if (part.message.content) {
         if (isThinking) {
@@ -299,6 +301,5 @@ and the provided image, as long as an image is provided in the message object.
     saveEntry(sessionId, entry);
   }
 
-  stream.write(content);
   stream.end();
 }
