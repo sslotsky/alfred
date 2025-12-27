@@ -9,6 +9,7 @@ import { config } from "dotenv";
 import { redisClient } from "./redis.ts";
 import cookieParser from "cookie-parser";
 import puppeteer, { type CookieData } from "puppeteer";
+import morgan from "morgan";
 
 const env = process.env.NODE_ENV ?? "development";
 
@@ -34,6 +35,7 @@ redisClient()
   });
 
 app.set("view engine", "pug");
+app.use(morgan("tiny"));
 app.use(express.static("public"));
 app.use(cookieParser());
 app.use(
