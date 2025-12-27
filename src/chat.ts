@@ -33,7 +33,7 @@ import { readFileSync } from "fs";
 
 const OLLAMA_API_URL =
   process.env.OLLAMA_API_URL || "http://localhost:11434";
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "gemma3";
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "qwen3";
 
 type Entry = { messages: Message[] };
 
@@ -122,7 +122,6 @@ export async function chat(
   const userMessage: Message = {
     role: "user",
     content: prompt.trim(),
-    images: imagePath ? [imagePath] : undefined,
   };
 
   entry.messages.push(userMessage);
