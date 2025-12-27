@@ -298,6 +298,5 @@ and the provided image, as long as an image is provided in the message object.
     saveEntry(sessionId, entry);
   }
 
-  stream.write(content);
   stream.end();
 }
