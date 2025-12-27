@@ -1,4 +1,5 @@
-import copy from 'rollup-plugin-copy-watch';
+import copyWatch from 'rollup-plugin-copy-watch';
+import copy from 'rollup-plugin-copy';
 import resolve from '@rollup/plugin-node-resolve';
 // import {terser} from '@rollup/plugin-terser';
 // import minifyHTML from 'rollup-plugin-minify-html-literals';
@@ -6,6 +7,8 @@ import summary from 'rollup-plugin-summary';
 import typescript from '@rollup/plugin-typescript';
 import commonjs from '@rollup/plugin-commonjs';
 
+
+const copyPlugin = process.env.WATCH_ASSETS ? copyWatch : copy;
 
 export default {
   plugins: [
@@ -27,7 +30,7 @@ export default {
     commonjs({
       requireReturnsDefault: 'auto'
     }),
-    copy({
+    copyPlugin({
       targets: [
         { src: ['**/*.css', '**/*.svg', '!node_modules', '!public'], dest: 'public'},
       ],

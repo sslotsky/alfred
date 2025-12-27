@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node --experimental-strip-types src/server.ts && rollup -c",
+    "start": "rollup -c && node --experimental-strip-types src/server.ts",
     "start-dev": "concurrently 'pnpm watch-client' 'pnpm watch-server'",
     "build-prod-image": "docker build -t alfred-image .",
     "build-dev-image": "docker build --build-arg DOCKER_LOCAL=true -t alfred-image .",
