@@ -222,7 +222,9 @@ app.get("/", async (req, resp) => {
     console.error(e);
   }
 
-  resp.render("login");
+  resp.render("login", {
+    busted: Math.floor(Math.random() * 100),
+  });
 });
 
 app.get("/chat", authMiddleware, async (req, res) => {
