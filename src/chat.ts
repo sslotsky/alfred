@@ -126,8 +126,6 @@ export async function chat(
 
   entry.messages.push(userMessage);
 
-  saveEntry(sessionId, entry);
-
   let systemPrompt = `
 Your name is Alfred and you can think of yourself as a digital butler for the user, ${user.emails[0].email}.
 Your job is to serve the user's every request, in a polite and dignified manner befitting of a butler.
